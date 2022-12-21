@@ -1,7 +1,6 @@
 package fsm;
 
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
 import static org.hamcrest.CoreMatchers.instanceOf;
 
 import org.junit.Test;

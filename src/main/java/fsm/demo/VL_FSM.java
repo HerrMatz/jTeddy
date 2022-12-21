@@ -7,10 +7,6 @@ public class VL_FSM extends Superstate<Event> {
 
 	public static class VL_FSMState extends State<Event> {
 
-		// public VL_FSMState() {
-		// 	super(Event.class);
-		// }
-
 		public VL_FSMState(State<Event> from) {
 			super(from, Event.class);
 		}
@@ -67,9 +63,6 @@ public class VL_FSM extends Superstate<Event> {
 		}
 		public C(State<Event> from) {
 			super(from);
-			// transitions.put(Event.start, (payload -> 
-			// 	ENTER(new Initial(this))
-			// ));
 
 			transitions.put(Event.bypass, (payload -> 
 				ENTER(new D(this))
@@ -173,7 +166,5 @@ public class VL_FSM extends Superstate<Event> {
 
 	public VL_FSM() {
 		super(null, new A(null), Event.class);
-		// parallelSubstates.add(new Initial());
-		// self = new Initial();
 	}
 }

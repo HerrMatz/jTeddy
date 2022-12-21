@@ -44,21 +44,6 @@ public abstract class State<E extends Enum<E>> {
 		return ret;
 	}
 
-	public void exitAction() {
-
-	}
-
-	public void entryAction() {
-
-	}
-
-	// public void enter(State<E> newState, Class<E> t) {
-	// 	init(t);
-	// 	self.exitAction();
-	// 	self = newState;
-	// 	self.entryAction();
-	// }
-
 	public EventConsumption ENTER(State<E> newState) {
 		if(parent != null) {
 			parent.parallelSubstates.remove(this);
@@ -74,5 +59,9 @@ public abstract class State<E extends Enum<E>> {
 	public List<State<E>> getSubstates() {
 		return parallelSubstates;
 	}
+
+	public void exitAction() {}
+
+	public void entryAction() {}
 
 }
