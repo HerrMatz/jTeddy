@@ -1,4 +1,4 @@
-package fsm;
+package fsm.base;
 
 public class Superstate extends State {
 	

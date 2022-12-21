@@ -1,6 +1,9 @@
 package fsm;
 
-public class VL_Superstate extends Superstate {
+import fsm.base.State;
+import fsm.base.Superstate;
+
+public class VL_FSM extends Superstate {
 
 	public static class Initial extends State {
 		@Override
@@ -78,7 +81,7 @@ public class VL_Superstate extends Superstate {
 		}
 	}
 
-	public VL_Superstate() {
+	public VL_FSM() {
 		super(new Initial());
 		// parallelSubstates.add(new Initial());
 		// self = new Initial();

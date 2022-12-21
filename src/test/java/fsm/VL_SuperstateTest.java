@@ -11,11 +11,11 @@ public class VL_SuperstateTest {
 	
 	@Test
 	public void simple() {
-		VL_Superstate fsm = new VL_Superstate();
-		assertThat(fsm.getSubstates().get(0).getState(), instanceOf(VL_Superstate.Initial.class));
+		VL_FSM fsm = new VL_FSM();
+		assertThat(fsm.getSubstates().get(0).getState(), instanceOf(VL_FSM.Initial.class));
 		fsm.handleEvent(Event.start);
-		assertThat(fsm.getSubstates().get(0).getState(), instanceOf(VL_Superstate.Beta.class));
+		assertThat(fsm.getSubstates().get(0).getState(), instanceOf(VL_FSM.Beta.class));
 		fsm.handleEvent(Event.start);
-		assertThat(fsm.getSubstates().get(0).getState(), instanceOf(VL_Superstate.Gamma.class));
+		assertThat(fsm.getSubstates().get(0).getState(), instanceOf(VL_FSM.Gamma.class));
 	}
 }

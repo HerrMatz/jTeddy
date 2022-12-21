@@ -1,22 +1,19 @@
-package fsm;
+package fsm.base;
 
 import java.util.*;
 import java.util.function.Function;
 
+import fsm.Event;
+
 public abstract class State {
 	// StateTree substates;
-	State self;
-	State parent;
-	List<State> parallelSubstates;
-	Map<Event, Function<Integer, EventConsumption>> transitions;
+	protected State self;
+	protected State parent;
+	protected List<State> parallelSubstates;
+	protected Map<Event, Function<Integer, EventConsumption>> transitions;
 
 	public State() {
 		this(null);
-		// self = this;
-		// parent = null;
-		// parallelSubstates = new ArrayList<>();
-		// transitions = new HashMap<>();
-		// init();
 	}
 
 	public State(State other) {
@@ -75,10 +72,6 @@ public abstract class State {
 			newState.parent = parent;
 			parent = null;
 		}
-		// init();
-		// self.exitAction();
-		// self = newState;
-		// self.entryAction();
 		exitAction();
 		newState.entryAction();
 		return EventConsumption.fullyUsed;
@@ -91,10 +84,5 @@ public abstract class State {
 	public List<State> getSubstates() {
 		return parallelSubstates;
 	}
-
-	public State copy() {
-		return null;
-	}
-
 
 }

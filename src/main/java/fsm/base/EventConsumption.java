@@ -1,4 +1,4 @@
-package fsm;
+package fsm.base;
 
 public enum EventConsumption {
 	unused,
