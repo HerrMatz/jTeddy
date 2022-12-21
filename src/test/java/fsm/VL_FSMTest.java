@@ -17,8 +17,10 @@ public class VL_FSMTest {
 		VL_FSM fsm = new VL_FSM();
 		assertThat(fsm.getSubstates().get(0), instanceOf(VL_FSM.Initial.class));
 		fsm.handleEvent(Event.start);
-		assertThat(fsm.getSubstates().get(0), instanceOf(VL_FSM.Beta.class));
-		fsm.handleEvent(Event.start);
-		assertThat(fsm.getSubstates().get(0), instanceOf(VL_FSM.Gamma.class));
+		assertThat(fsm.getSubstates().get(0), instanceOf(VL_FSM.Sub.class));
+		assertThat(fsm.getSubstates().get(0).getSubstates().get(0), instanceOf(VL_FSM.Sub.Normal.class));
+		fsm.handleEvent(Event.up);
+		assertThat(fsm.getSubstates().get(0), instanceOf(VL_FSM.Sub.class));
+		assertThat(fsm.getSubstates().get(0).getSubstates().get(0), instanceOf(VL_FSM.Sub.High.class));
 	}
 }

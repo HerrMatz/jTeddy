@@ -35,17 +35,16 @@ public abstract class State<E extends Enum<E>> {
 	}
 
 	public EventConsumption handleEvent(E event) {
-		EventConsumption ret = transitions.get(event).apply(0);
-		if(ret != EventConsumption.fullyUsed) {
-			for(State<E> substate : parallelSubstates) {
-				ret = substate.transitions.get(event).apply(0);
-				if(ret == EventConsumption.fullyUsed) {
-					return EventConsumption.fullyUsed;
-				}
+		EventConsumption ret = EventConsumption.unused;
+		for(State<E> state : parallelSubstates) {
+			if(state.parallelSubstates.isEmpty() || (ret = state.handleEvent(event)) != EventConsumption.fullyUsed){
+				ret = state.transitions.get(event).apply(0);
 			}
 		}
 		return ret;
 	}
+
+	// private EventConsumption distributeEvent(E event,)
 
 	public void exitAction() {
 
