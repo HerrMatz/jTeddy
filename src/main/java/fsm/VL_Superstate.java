@@ -8,7 +8,7 @@ public class VL_Superstate extends Superstate {
 			System.out.println("Bin in Initial");
 		}
 		public Initial() {
-			this(self);
+			this(null);
 		}
 		public Initial(State from) {
 			super(from);
@@ -58,11 +58,11 @@ public class VL_Superstate extends Superstate {
 		@Override
 		public void entryAction() {
 		}
-		public Sub() {
+		public Sub(State from) {
 			super(new Normal());
 
 			transitions.put(Event.reset, (payload ->
-				ENTER(new Sub())
+				ENTER(new Sub(this))
 			));
 			
 			// transitions.put(Event.error, (payload ->

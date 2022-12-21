@@ -11,18 +11,28 @@ public abstract class State {
 	Map<Event, Function<Integer, EventConsumption>> transitions;
 
 	public State() {
-		self = this;
-		parent = null;
-		parallelSubstates = new ArrayList<>();
-		transitions = new HashMap<>();
+		this(null);
+		// self = this;
+		// parent = null;
+		// parallelSubstates = new ArrayList<>();
+		// transitions = new HashMap<>();
 		// init();
 	}
 
 	public State(State other) {
-		self = other.self;
-		parent = other.parent;
-		parallelSubstates = other.parallelSubstates;
-		transitions = other.transitions;
+		if(other != null){
+			self = other.self;
+			parent = other.parent;
+			parallelSubstates = other.parallelSubstates;
+			transitions = other.transitions;
+			init();
+		}
+		else {
+			self = this;
+			parent = null;
+			parallelSubstates = new ArrayList<>();
+			transitions = new HashMap<>();
+		}
 	}
 
 	public void init() {
@@ -59,10 +69,18 @@ public abstract class State {
 	}
 
 	public EventConsumption ENTER(State newState) {
-		init();
-		self.exitAction();
-		self = newState;
-		self.entryAction();
+		if(parent != null) {
+			parent.parallelSubstates.remove(this);
+			parent.parallelSubstates.add(newState);
+			newState.parent = parent;
+			parent = null;
+		}
+		// init();
+		// self.exitAction();
+		// self = newState;
+		// self.entryAction();
+		exitAction();
+		newState.entryAction();
 		return EventConsumption.fullyUsed;
 	}
 
