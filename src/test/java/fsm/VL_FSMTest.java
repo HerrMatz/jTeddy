@@ -7,7 +7,10 @@ import static org.hamcrest.CoreMatchers.instanceOf;
 
 import org.junit.Test;
 
-public class VL_SuperstateTest {
+import fsm.demo.Event;
+import fsm.demo.VL_FSM;
+
+public class VL_FSMTest {
 	
 	@Test
 	public void simple() {

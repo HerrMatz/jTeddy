@@ -3,7 +3,7 @@ package fsm.base;
 import java.util.*;
 import java.util.function.Function;
 
-import fsm.Event;
+import fsm.demo.Event;
 
 public abstract class State {
 	// StateTree substates;

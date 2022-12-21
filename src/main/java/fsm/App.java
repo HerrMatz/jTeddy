@@ -1,5 +1,8 @@
 package fsm;
 
+import fsm.demo.Event;
+import fsm.demo.VL_FSM;
+
 /**
  * Hello world!
  *

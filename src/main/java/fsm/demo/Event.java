@@ -1,4 +1,4 @@
-package fsm;
+package fsm.demo;
 
 public enum Event {
 	start,

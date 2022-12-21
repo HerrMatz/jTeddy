@@ -1,4 +1,4 @@
-package fsm;
+package fsm.demo;
 
 import fsm.base.State;
 import fsm.base.Superstate;
