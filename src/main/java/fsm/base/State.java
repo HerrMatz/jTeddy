@@ -3,44 +3,41 @@ package fsm.base;
 import java.util.*;
 import java.util.function.Function;
 
-import fsm.demo.Event;
+public abstract class State<E extends Enum<E>> {
+	protected State<E> parent;
+	protected List<State<E>> parallelSubstates;
+	protected Set<E> events;
+	protected Map<E, Function<Integer, EventConsumption>> transitions;
 
-public abstract class State {
-	// StateTree substates;
-	protected State self;
-	protected State parent;
-	protected List<State> parallelSubstates;
-	protected Map<Event, Function<Integer, EventConsumption>> transitions;
-
-	public State() {
-		this(null);
+	public State(Class<E> classEvent) {
+		this(null, classEvent);
 	}
 
-	public State(State other) {
+	public State(State<E> other, Class<E> eventType) {
 		if(other != null){
-			self = other.self;
 			parent = other.parent;
 			parallelSubstates = other.parallelSubstates;
+			events = other.events;
 			transitions = other.transitions;
-			init();
 		}
 		else {
-			self = this;
 			parent = null;
 			parallelSubstates = new ArrayList<>();
+			events = EnumSet.allOf(eventType);
 			transitions = new HashMap<>();
 		}
+		init();
 	}
 
 	public void init() {
-		for(Event event : Event.values())
+		for(E event : events)
 			transitions.put(event, (payload -> EventConsumption.unused));
 	}
 
-	public EventConsumption handleEvent(Event event) {
-		EventConsumption ret = self.transitions.get(event).apply(0);
+	public EventConsumption handleEvent(E event) {
+		EventConsumption ret = transitions.get(event).apply(0);
 		if(ret != EventConsumption.fullyUsed) {
-			for(State substate : parallelSubstates) {
+			for(State<E> substate : parallelSubstates) {
 				ret = substate.transitions.get(event).apply(0);
 				if(ret == EventConsumption.fullyUsed) {
 					return EventConsumption.fullyUsed;
@@ -58,14 +55,14 @@ public abstract class State {
 
 	}
 
-	public void enter(State newState) {
-		init();
-		self.exitAction();
-		self = newState;
-		self.entryAction();
-	}
+	// public void enter(State<E> newState, Class<E> t) {
+	// 	init(t);
+	// 	self.exitAction();
+	// 	self = newState;
+	// 	self.entryAction();
+	// }
 
-	public EventConsumption ENTER(State newState) {
+	public EventConsumption ENTER(State<E> newState) {
 		if(parent != null) {
 			parent.parallelSubstates.remove(this);
 			parent.parallelSubstates.add(newState);
@@ -77,11 +74,7 @@ public abstract class State {
 		return EventConsumption.fullyUsed;
 	}
 
-	public State getState() {
-		return self;
-	}
-
-	public List<State> getSubstates() {
+	public List<State<E>> getSubstates() {
 		return parallelSubstates;
 	}
 

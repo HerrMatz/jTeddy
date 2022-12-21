@@ -1,9 +1,10 @@
 package fsm.base;
 
-public class Superstate extends State {
+public class Superstate<E extends Enum<E>> extends State<E> {
 	
-	public Superstate(State sub) {
-		init();
+	public Superstate(State<E> sub, Class<E> classEvent) {
+		super(null, classEvent);
+		// init();
 		parallelSubstates.add(sub);
 		sub.parent = this;
 	}

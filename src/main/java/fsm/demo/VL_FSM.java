@@ -3,17 +3,41 @@ package fsm.demo;
 import fsm.base.State;
 import fsm.base.Superstate;
 
-public class VL_FSM extends Superstate {
+public class VL_FSM extends Superstate<Event> {
 
-	public static class Initial extends State {
+	public static class VL_FSMState extends State<Event> {
+
+		// public VL_FSMState() {
+		// 	super(Event.class);
+		// }
+
+		public VL_FSMState(VL_FSMState from) {
+			super(from, Event.class);
+		}
+
+	}
+
+	public static class VL_FSMSuperstate extends Superstate<Event> {
+
+		public VL_FSMSuperstate() {
+			super(null, Event.class);
+		}
+
+		public VL_FSMSuperstate(VL_FSMSuperstate from) {
+			super(from, Event.class);
+		}
+
+	}
+
+	public static class Initial extends VL_FSMState {
 		@Override
 		public void entryAction() {
 			System.out.println("Bin in Initial");
 		}
-		public Initial() {
-			this(null);
-		}
-		public Initial(State from) {
+		// public Initial() {
+		// 	this(null);
+		// }
+		public Initial(VL_FSMState from) {
 			super(from);
 			transitions.put(Event.start, (payload -> 
 				ENTER(new Beta(this))
@@ -25,12 +49,13 @@ public class VL_FSM extends Superstate {
 		}
 	}
 
-	public static class Beta extends State {
+	public static class Beta extends VL_FSMState {
 		@Override
 		public void entryAction() {
 			System.out.println("Bin in Initial");
 		}
-		public Beta(State from) {
+		public Beta(VL_FSMState from) {
+			super(from);
 			transitions.put(Event.start, (payload -> 
 				ENTER(new Gamma(this))
 			));
@@ -41,12 +66,13 @@ public class VL_FSM extends Superstate {
 		}
 	}
 
-	public static class Gamma extends State {
+	public static class Gamma extends VL_FSMState {
 		@Override
 		public void entryAction() {
 			System.out.println("Bin in Initial");
 		}
-		public Gamma(State from) {
+		public Gamma(VL_FSMState from) {
+			super(from);
 			transitions.put(Event.start, (payload -> 
 				ENTER(new Initial(this))
 			));
@@ -57,12 +83,12 @@ public class VL_FSM extends Superstate {
 		}
 	}
 
-	public static class Sub extends Superstate {
+	public static class Sub extends VL_FSMState {
 		@Override
 		public void entryAction() {
 		}
-		public Sub(State from) {
-			super(new Normal());
+		public Sub(VL_FSMState from) {
+			super(new Normal(from));
 
 			transitions.put(Event.reset, (payload ->
 				ENTER(new Sub(this))
@@ -74,15 +100,16 @@ public class VL_FSM extends Superstate {
 			
 		}
 
-		public static class Normal extends State {
-			public Normal() {
+		public static class Normal extends VL_FSMState {
+			public Normal(VL_FSMState from) {
+				super(from);
 
 			}
 		}
 	}
 
 	public VL_FSM() {
-		super(new Initial());
+		super(new Initial(null), Event.class);
 		// parallelSubstates.add(new Initial());
 		// self = new Initial();
 	}
