@@ -44,8 +44,6 @@ public abstract class State<E extends Enum<E>> {
 		return ret;
 	}
 
-	// private EventConsumption distributeEvent(E event,)
-
 	public void exitAction() {
 
 	}
