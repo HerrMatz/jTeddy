@@ -1,7 +1,5 @@
 package fsm.demo;
 
-// import fsm.base.IEvent;
-
 public enum Event {
 	start,
 	bypass,
