@@ -28,7 +28,7 @@ public class VL_FSM extends Superstate<Event> {
 	public static class A extends VL_FSMState {
 		@Override
 		public void entryAction() {
-			System.out.println("Bin in Initial");
+			System.out.println("Bin in A");
 		}
 		public A(VL_FSMState from) {
 			super(from);
@@ -45,7 +45,7 @@ public class VL_FSM extends Superstate<Event> {
 	public static class B extends VL_FSMState {
 		@Override
 		public void entryAction() {
-			System.out.println("Bin in Initial");
+			System.out.println("Bin in B");
 		}
 		public B(VL_FSMState from) {
 			super(from);
@@ -59,7 +59,7 @@ public class VL_FSM extends Superstate<Event> {
 	public static class C extends VL_FSMState {
 		@Override
 		public void entryAction() {
-			System.out.println("Bin in Initial");
+			System.out.println("Bin in C");
 		}
 		public C(State<Event> from) {
 			super(from);
@@ -67,13 +67,17 @@ public class VL_FSM extends Superstate<Event> {
 			transitions.put(Event.bypass, (payload -> 
 				ENTER(new D(this))
 			));
+
+			transitions.put(Event.toF, (payload -> 
+				ENTER(new F(this))
+			));
 		}
 	}
 
 	public static class D extends VL_FSMState {
 		@Override
 		public void entryAction() {
-			System.out.println("Bin in Initial");
+			System.out.println("Bin in D");
 		}
 		public D(State<Event> from) {
 			super(from);
@@ -90,10 +94,23 @@ public class VL_FSM extends Superstate<Event> {
 	public static class E extends VL_FSMState {
 		@Override
 		public void entryAction() {
-			System.out.println("Bin in Initial");
+			System.out.println("Bin in E");
 		}
 		public E(State<Event> from) {
 			super(from);
+		}
+	}
+
+	public static class F extends VL_FSMState {
+		@Override
+		public void entryAction() {
+			System.out.println("Bin in F");
+		}
+		public F(State<Event> from) {
+			super(from);
+			transitions.put(Event.clear, (payload -> 
+				ENTER_DEEP(new Sub(null))
+			));
 		}
 	}
 
@@ -136,9 +153,9 @@ public class VL_FSM extends Superstate<Event> {
 					ENTER(new Low(this))
 				));
 
-				// transitions.put(Event.exceed, (payload ->
-				// 	//exit
-				// ));
+				transitions.put(Event.exceed, (payload ->
+					EXIT()
+				));
 			}
 		}
 
