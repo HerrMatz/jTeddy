@@ -75,7 +75,7 @@ public class VL_FSM extends Superstate<Event> {
 		public void entryAction() {
 			System.out.println("Bin in Initial");
 		}
-		public D(VL_FSMState from) {
+		public D(State<Event> from) {
 			super(from);
 			// transitions.put(Event.start, (payload -> 
 			// 	ENTER(new Initial(this))
@@ -92,7 +92,7 @@ public class VL_FSM extends Superstate<Event> {
 		public void entryAction() {
 			System.out.println("Bin in Initial");
 		}
-		public E(VL_FSMState from) {
+		public E(State<Event> from) {
 			super(from);
 		}
 	}
@@ -119,9 +119,12 @@ public class VL_FSM extends Superstate<Event> {
 				transitions.put(Event.clear, (payload ->
 					ENTER(new Normal(this))
 				));
-				// transitions.put(Event.exceed, (payload ->
-				// 	//exit
-				// ));
+				transitions.put(Event.exceed, (payload ->
+					EXIT()
+				));
+				transitions.put(Event.last, (payload ->
+					EXIT(new C(parent))
+				));
 			}
 		}
 
@@ -140,6 +143,11 @@ public class VL_FSM extends Superstate<Event> {
 		}
 
 		@Override
+		public VL_FSMState defaultExit() {
+			return new D(this);
+		}
+
+		@Override
 		public void entryAction() {
 		}
 		public Sub(State<Event> from, VL_FSMState entry) {
@@ -152,8 +160,8 @@ public class VL_FSM extends Superstate<Event> {
 				ENTER(new Sub(this))
 			));
 			
-			transitions.put(Event.last, (payload -> 
-				ENTER(new C(this))
+			transitions.put(Event.error, (payload -> 
+				ENTER(new E(this))
 			));
 
 			// transitions.put(Event.error, (payload ->
@@ -161,7 +169,6 @@ public class VL_FSM extends Superstate<Event> {
 			// ));
 			
 		}
-
 	}
 
 	public VL_FSM() {

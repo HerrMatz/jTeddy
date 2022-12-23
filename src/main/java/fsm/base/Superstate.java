@@ -7,4 +7,5 @@ public class Superstate<E extends Enum<E>> extends State<E> {
 		parallelSubstates.add(sub);
 		sub.parent = this;
 	}
+
 }
