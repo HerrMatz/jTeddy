@@ -51,12 +51,16 @@ public abstract class State<E extends Enum<E>> {
 
 	public EventConsumption ENTER(State<E> newState) {
 		if(parent != null) {
+			if(this instanceof Superstate<E>) {
+				pause();
+				parent.pausedSubstates.add(this);
+			}
 			parent.parallelSubstates.remove(this);
 			parent.parallelSubstates.add(newState);
-			newState.parent = parent;
-			parent = null;
+			// newState.parent = parent;
+			// parent = null;
 		}
-		pauseSubstates();
+		// pauseSubstates();
 		exitAction();
 		newState.entryAction();
 		return EventConsumption.fullyUsed;
@@ -69,6 +73,7 @@ public abstract class State<E extends Enum<E>> {
 				if(superstate.getClass().equals(substate.getClass())) {
 					parent.unpauseSubstates();
 					deepHistoryFound = true;
+					break;
 				}
 			}
 		}

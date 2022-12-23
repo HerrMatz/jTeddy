@@ -98,6 +98,9 @@ public class VL_FSM extends Superstate<Event> {
 		}
 		public E(State<Event> from) {
 			super(from);
+			transitions.put(Event.toF, (payload -> 
+				ENTER(new F(this))
+			));
 		}
 	}
 

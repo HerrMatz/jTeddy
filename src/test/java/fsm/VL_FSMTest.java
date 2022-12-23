@@ -115,4 +115,24 @@ public class VL_FSMTest {
 		assertThat(fsm.getSubstates().get(0).getSubstates().get(0), instanceOf(VL_FSM.Sub.Low.class));
 	}
 
+	@Test
+	public void enterShallowHistoryAfterExplicitOuterExit() {
+		VL_FSM fsm = new VL_FSM();
+		assertThat(fsm.getSubstates().get(0), instanceOf(VL_FSM.A.class));
+		fsm.handleEvent(Event.start);
+		assertThat(fsm.getSubstates().get(0), instanceOf(VL_FSM.Sub.class));
+		assertThat(fsm.getSubstates().get(0).getSubstates().get(0), instanceOf(VL_FSM.Sub.Normal.class));
+		fsm.handleEvent(Event.up);
+		assertThat(fsm.getSubstates().get(0), instanceOf(VL_FSM.Sub.class));
+		assertThat(fsm.getSubstates().get(0).getSubstates().get(0), instanceOf(VL_FSM.Sub.High.class));
+		fsm.handleEvent(Event.error);
+		assertThat(fsm.getSubstates().get(0), instanceOf(VL_FSM.E.class));
+
+		fsm.handleEvent(Event.toF);
+		assertThat(fsm.getSubstates().get(0), instanceOf(VL_FSM.F.class));
+		fsm.handleEvent(Event.clear);
+		assertThat(fsm.getSubstates().get(0), instanceOf(VL_FSM.Sub.class));
+		assertThat(fsm.getSubstates().get(0).getSubstates().get(0), instanceOf(VL_FSM.Sub.High.class));
+	}
+
 }
