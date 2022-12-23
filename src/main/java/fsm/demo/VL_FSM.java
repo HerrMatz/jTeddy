@@ -10,7 +10,6 @@ public class VL_FSM extends Superstate<Event> {
 		public VL_FSMState(State<Event> from) {
 			super(from, Event.class);
 		}
-
 	}
 
 	public static class VL_FSMSuperstate extends Superstate<Event> {
@@ -25,9 +24,16 @@ public class VL_FSM extends Superstate<Event> {
 
 	}
 
+	public StringBuilder data = new StringBuilder();
+
 	public static class A extends VL_FSMState {
 		@Override
 		public void entryAction() {
+			System.out.println("Bin in A");
+			get(VL_FSM.class, StringBuilder.class, "data").append("iA");
+		}
+		@Override
+		public void exitAction() {
 			System.out.println("Bin in A");
 		}
 		public A(VL_FSMState from) {
@@ -192,6 +198,7 @@ public class VL_FSM extends Superstate<Event> {
 	}
 
 	public VL_FSM() {
-		super(null, new A(null), Event.class);
+		super(null, null, Event.class);
+		start(new A(null));
 	}
 }

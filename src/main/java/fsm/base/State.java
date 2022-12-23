@@ -1,5 +1,6 @@
 package fsm.base;
 
+import java.lang.reflect.Field;
 import java.util.*;
 import java.util.function.Function;
 
@@ -157,6 +158,21 @@ public abstract class State<E extends Enum<E>> {
 
 	public List<State<E>> getSubstates() {
 		return parallelSubstates;
+	}
+
+	public <T> T get(Class<? extends State<E>> clazz, Class<T> type, String field) {
+		for(State<E> state = parent; parent != null; parent = parent.parent) {
+			if(state.getClass().equals(clazz)) {
+				try {
+					return type.cast(clazz.getField(field).get(state));
+				} catch (IllegalArgumentException | IllegalAccessException | NoSuchFieldException
+						| SecurityException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
+		return null;
 	}
 
 	public void exitAction() {}
