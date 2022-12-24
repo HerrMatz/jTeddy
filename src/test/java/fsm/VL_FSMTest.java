@@ -160,6 +160,10 @@ public class VL_FSMTest {
 		assertEquals("iA", fsm.data.toString());
 		fsm.handleEvent(Event.start);
 		assertEquals("iAoAiSiN", fsm.data.toString());
+		fsm.handleEvent(Event.up);
+		assertThat(fsm.getSubstates().get(0), instanceOf(VL_FSM.Sub.class));
+		assertThat(fsm.getSubstates().get(0).getSubstates().get(0), instanceOf(VL_FSM.Sub.High.class));
+		assertEquals("iAoAiSiNoNiH", fsm.data.toString());
 	}
 	
 }
