@@ -61,7 +61,12 @@ public class VL_FSM extends Superstate<Event> {
 	public static class C extends VL_FSMState {
 		@Override
 		public void entryAction() {
-			System.out.println("Bin in C");
+			get(VL_FSM.class, StringBuilder.class, "data").append("iC");
+		}
+
+		@Override
+		public void exitAction() {
+			get(VL_FSM.class, StringBuilder.class, "data").append("oC");
 		}
 
 		public C(State<Event> from) {
@@ -74,7 +79,12 @@ public class VL_FSM extends Superstate<Event> {
 	public static class D extends VL_FSMState {
 		@Override
 		public void entryAction() {
-			System.out.println("Bin in D");
+			get(VL_FSM.class, StringBuilder.class, "data").append("iD");
+		}
+
+		@Override
+		public void exitAction() {
+			get(VL_FSM.class, StringBuilder.class, "data").append("oD");
 		}
 
 		public D(State<Event> from) {
@@ -85,7 +95,12 @@ public class VL_FSM extends Superstate<Event> {
 	public static class E extends VL_FSMState {
 		@Override
 		public void entryAction() {
-			System.out.println("Bin in E");
+			get(VL_FSM.class, StringBuilder.class, "data").append("iE");
+		}
+
+		@Override
+		public void exitAction() {
+			get(VL_FSM.class, StringBuilder.class, "data").append("oE");
 		}
 
 		public E(State<Event> from) {
@@ -97,7 +112,12 @@ public class VL_FSM extends Superstate<Event> {
 	public static class F extends VL_FSMState {
 		@Override
 		public void entryAction() {
-			System.out.println("Bin in F");
+			get(VL_FSM.class, StringBuilder.class, "data").append("iF");
+		}
+
+		@Override
+		public void exitAction() {
+			get(VL_FSM.class, StringBuilder.class, "data").append("oF");
 		}
 
 		public F(State<Event> from) {
@@ -132,6 +152,15 @@ public class VL_FSM extends Superstate<Event> {
 				transitions.put(Event.clear, (payload -> ENTER(new Normal(this))));
 				transitions.put(Event.exceed, (payload -> EXIT()));
 				transitions.put(Event.last, (payload -> EXIT(new C(parent))));
+			}
+			@Override
+			public void entryAction() {
+				get(VL_FSM.class, StringBuilder.class, "data").append("iL");
+			}
+
+			@Override
+			public void exitAction() {
+				get(VL_FSM.class, StringBuilder.class, "data").append("oL");
 			}
 		}
 

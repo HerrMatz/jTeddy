@@ -51,7 +51,10 @@ public abstract class State<E extends Enum<E>> {
 	}
 
 	protected EventConsumption ENTER(State<E> newState) {
-		exitAction();
+		for(var substate : parallelSubstates) {
+			substate.runExitAction();
+		}
+		runExitAction();
 		if(parent != null) {
 			if(this instanceof Superstate<E>) {
 				pause();
@@ -68,11 +71,6 @@ public abstract class State<E extends Enum<E>> {
 			substate.runEntryAction();
 		}
 		return EventConsumption.fullyUsed;
-	}
-
-	public State<E> subState(State<E> sub) {
-		sub.runEntryAction();
-		return sub;
 	}
 
 	protected EventConsumption ENTER_DEEP(State<E> superstate) {
@@ -93,15 +91,19 @@ public abstract class State<E extends Enum<E>> {
 	}
 
 	protected EventConsumption EXIT() {
-		var ret = EXIT(parent.defaultExit());
+		var ret = EXIT(parent.defaultExit(), true);
 		pausedSubstates.clear();
 		return ret;
 	}
 
 	protected EventConsumption EXIT(State<E> explicitExitState) {
-		exitAction();
+		return EXIT(explicitExitState, false);
+	}
+
+	private EventConsumption EXIT(State<E> explicitExitState, boolean runExAc) {
+		runExitAction();
 		if(parent != null) {
-			parent.exitAction();
+			parent.runExitAction();
 			if(parent.parent != null) {
 				// parent.parentSwitchSubstate(parent, explicitExitState);
 				var pp = parent.parent;
@@ -109,7 +111,6 @@ public abstract class State<E extends Enum<E>> {
 				list.set(list.indexOf(parent), explicitExitState);
 				pp.pausedSubstates.add(parent);
 				// parent.parent.pauseSubstates();
-
 			}
 		}
 
@@ -125,7 +126,7 @@ public abstract class State<E extends Enum<E>> {
 		if(parent != null) {
 			var list = parent.parallelSubstates;
 			list.set(list.indexOf(from), to);
-			from.exitAction();
+			from.runExitAction();
 			to.parent = from.parent;
 			from.parent = null;
 		}
@@ -139,7 +140,7 @@ public abstract class State<E extends Enum<E>> {
 			parallelSubstates.clear();
 			parent = null;
 		}
-		exitAction();
+		runExitAction();
 	}
 
 	private void pause() {
@@ -183,17 +184,20 @@ public abstract class State<E extends Enum<E>> {
 		return null;
 	}
 
-	public void exitAction() {}
+	private void runExitAction() {
+		exitAction();
+	}
+	protected void exitAction() {}
 
 	private void runEntryAction() {
 		if(!ranEntryAction)
 			entryAction();
 		ranEntryAction = true;
 	}
-	public void entryAction() {}
+	protected void entryAction() {}
 
-	public void pauseAction() {}
+	protected void pauseAction() {}
 
-	public void unpauseAction() {}
+	protected void unpauseAction() {}
 
 }
