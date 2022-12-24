@@ -68,14 +68,6 @@ public abstract class State<E extends Enum<E>> {
 		// runExitAction();
 		if(parent != null) {
 			parentSwitchSubstate(this, newState, this instanceof Superstate<E>);
-			// if(this instanceof Superstate<E>) {
-			// 	pause();
-			// 	parent.pausedSubstates.add(this);
-			// }
-			// parent.parallelSubstates.remove(this);
-			// parent.parallelSubstates.add(newState);
-			// newState.parent = parent;
-			// parent = null;
 		}
 		// pauseSubstates();
 		newState.runEntryAction();
@@ -106,9 +98,6 @@ public abstract class State<E extends Enum<E>> {
 
 	protected EventConsumption EXIT() {
 		return EXIT(parent.defaultExit(), true);
-		// var ret = EXIT(parent.defaultExit(), true);
-		// pausedSubstates.clear();
-		// return ret;
 	}
 
 	protected EventConsumption EXIT(State<E> explicitExitState) {
@@ -120,22 +109,6 @@ public abstract class State<E extends Enum<E>> {
 		explicitExitState.setUnpauseActionIsEntryAction(unpauseActionIsEntryAction);
 		runExitAction();
 		parent.parentSwitchSubstate(parent, explicitExitState, !execExitAction);
-		// if(parent != null) {
-		// 	parent.runExitAction();
-		// 	parent.parentSwitchSubstate(parent, explicitExitState, !execExitAction);
-		// 	// if(parent.parent != null) {
-		// 	// 	// parent.parentSwitchSubstate(parent, explicitExitState);
-		// 	// 	var pp = parent.parent;
-		// 	// 	var list = pp.parallelSubstates;
-		// 	// 	list.set(list.indexOf(parent), explicitExitState);
-		// 	// 	pp.pausedSubstates.add(parent);
-		// 	// 	// parent.parent.pauseSubstates();
-		// 	// }
-		// }
-		// else {
-		// 	throw new IllegalAccessError();
-		// }
-
 		explicitExitState.runEntryAction();
 		return EventConsumption.fullyUsed;
 	}
@@ -148,8 +121,6 @@ public abstract class State<E extends Enum<E>> {
 		if(parent != null) {
 			var list = parent.parallelSubstates;
 			list.set(list.indexOf(from), to);
-			// from.runExitAction();
-			// to.parent = from.parent;
 			if(pauseOldState) {
 				parent.pausedSubstates.add(from);
 				from.pause();
@@ -157,7 +128,6 @@ public abstract class State<E extends Enum<E>> {
 			else {
 				from.runExitAction();
 			}
-			// from.parent = null;
 		}
 	}
 
