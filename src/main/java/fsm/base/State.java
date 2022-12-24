@@ -85,13 +85,13 @@ public abstract class State<E extends Enum<E>> {
 		return EventConsumption.fullyUsed;
 	}
 
-	protected EventConsumption ENTER_DEEP(State<E> superstate) {
-		superstate.setPauseActionIsExitAction(pauseActionIsExitAction);
-		superstate.setUnpauseActionIsEntryAction(unpauseActionIsEntryAction);
+	protected EventConsumption ENTER_DEEP(State<E> stateWithHistory) {
+		stateWithHistory.setPauseActionIsExitAction(pauseActionIsExitAction);
+		stateWithHistory.setUnpauseActionIsEntryAction(unpauseActionIsEntryAction);
 		boolean deepHistoryFound = false;
 		if(parent != null) {
 			for(var substate : parent.pausedSubstates) {
-				if(superstate.getClass().equals(substate.getClass())) {
+				if(stateWithHistory.getClass().equals(substate.getClass())) {
 					parent.unpauseSubstates();
 					deepHistoryFound = true;
 					break;
@@ -99,7 +99,7 @@ public abstract class State<E extends Enum<E>> {
 			}
 		}
 		if(!deepHistoryFound) {
-			return ENTER(superstate);
+			return ENTER(stateWithHistory);
 		}
 		return EventConsumption.fullyUsed;
 	}
