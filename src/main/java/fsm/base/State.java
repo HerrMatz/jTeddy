@@ -1,6 +1,5 @@
 package fsm.base;
 
-import java.lang.reflect.Field;
 import java.util.*;
 import java.util.function.Function;
 
@@ -11,13 +10,14 @@ public abstract class State<E extends Enum<E>> {
 	protected Set<E> events;
 	protected Map<E, Function<Integer, EventConsumption>> transitions;
 	private boolean isPaused;	// is a substate and its superstate has been exited explicitly
+	private boolean ranEntryAction;
 
 	public State(Class<E> classEvent) {
 		this(null, classEvent);
 	}
 
 	public State(State<E> other, Class<E> eventType) {
-		if(other != null){
+		if(other != null) {
 			parent = other.parent;
 			parallelSubstates = new ArrayList<>();
 			events = other.events;
@@ -35,7 +35,7 @@ public abstract class State<E extends Enum<E>> {
 		init();
 	}
 
-	public void init() {
+	protected void init() {
 		for(E event : events)
 			transitions.put(event, (payload -> EventConsumption.unused));
 	}
@@ -50,7 +50,8 @@ public abstract class State<E extends Enum<E>> {
 		return ret;
 	}
 
-	public EventConsumption ENTER(State<E> newState) {
+	protected EventConsumption ENTER(State<E> newState) {
+		exitAction();
 		if(parent != null) {
 			if(this instanceof Superstate<E>) {
 				pause();
@@ -62,12 +63,19 @@ public abstract class State<E extends Enum<E>> {
 			// parent = null;
 		}
 		// pauseSubstates();
-		exitAction();
-		newState.entryAction();
+		newState.runEntryAction();
+		for(var substate : newState.parallelSubstates) {
+			substate.runEntryAction();
+		}
 		return EventConsumption.fullyUsed;
 	}
 
-	public EventConsumption ENTER_DEEP(State<E> superstate) {
+	public State<E> subState(State<E> sub) {
+		sub.runEntryAction();
+		return sub;
+	}
+
+	protected EventConsumption ENTER_DEEP(State<E> superstate) {
 		boolean deepHistoryFound = false;
 		if(parent != null) {
 			for(var substate : parent.pausedSubstates) {
@@ -84,13 +92,13 @@ public abstract class State<E extends Enum<E>> {
 		return EventConsumption.fullyUsed;
 	}
 
-	public EventConsumption EXIT() {
+	protected EventConsumption EXIT() {
 		var ret = EXIT(parent.defaultExit());
 		pausedSubstates.clear();
 		return ret;
 	}
 
-	public EventConsumption EXIT(State<E> explicitExitState) {
+	protected EventConsumption EXIT(State<E> explicitExitState) {
 		exitAction();
 		if(parent != null) {
 			parent.exitAction();
@@ -105,11 +113,11 @@ public abstract class State<E extends Enum<E>> {
 			}
 		}
 
-		explicitExitState.entryAction();
+		explicitExitState.runEntryAction();
 		return EventConsumption.fullyUsed;
 	}
 
-	public State<E> defaultExit() {
+	protected State<E> defaultExit() {
 		return null;
 	}
 
@@ -160,8 +168,8 @@ public abstract class State<E extends Enum<E>> {
 		return parallelSubstates;
 	}
 
-	public <T> T get(Class<? extends State<E>> clazz, Class<T> type, String field) {
-		for(State<E> state = parent; parent != null; parent = parent.parent) {
+	protected <T> T get(Class<? extends State<E>> clazz, Class<T> type, String field) {
+		for(State<E> state = parent; state != null; state = parent.parent) {
 			if(state.getClass().equals(clazz)) {
 				try {
 					return type.cast(clazz.getField(field).get(state));
@@ -177,6 +185,11 @@ public abstract class State<E extends Enum<E>> {
 
 	public void exitAction() {}
 
+	private void runEntryAction() {
+		if(!ranEntryAction)
+			entryAction();
+		ranEntryAction = true;
+	}
 	public void entryAction() {}
 
 	public void pauseAction() {}

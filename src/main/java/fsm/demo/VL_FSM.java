@@ -35,6 +35,7 @@ public class VL_FSM extends Superstate<Event> {
 		@Override
 		public void exitAction() {
 			System.out.println("Bin in A");
+			get(VL_FSM.class, StringBuilder.class, "data").append("oA");
 		}
 		public A(VL_FSMState from) {
 			super(from);
@@ -133,6 +134,14 @@ public class VL_FSM extends Superstate<Event> {
 					ENTER(new High(this))
 				));
 			}
+			@Override
+			public void entryAction() {
+				get(VL_FSM.class, StringBuilder.class, "data").append("iN");
+			}
+			@Override
+			public void exitAction() {
+				get(VL_FSM.class, StringBuilder.class, "data").append("oN");
+			}
 		}
 
 		public static class Low extends VL_FSMState {
@@ -175,13 +184,14 @@ public class VL_FSM extends Superstate<Event> {
 
 		@Override
 		public void entryAction() {
+			get(VL_FSM.class, StringBuilder.class, "data").append("iS");
+		}
+		@Override
+		public void exitAction() {
+			get(VL_FSM.class, StringBuilder.class, "data").append("oS");
 		}
 		public Sub(State<Event> from, VL_FSMState entry) {
 			super(from, entry);
-		}
-		public Sub(State<Event> from) {
-			this(from, new Normal(null));
-
 			transitions.put(Event.reset, (payload ->
 				ENTER(new Sub(this))
 			));
@@ -189,11 +199,9 @@ public class VL_FSM extends Superstate<Event> {
 			transitions.put(Event.error, (payload -> 
 				ENTER(new E(this))
 			));
-
-			// transitions.put(Event.error, (payload ->
-			// 	EXIT(Error)
-			// ));
-			
+		}
+		public Sub(State<Event> from) {
+			this(from, new Normal(null));
 		}
 	}
 

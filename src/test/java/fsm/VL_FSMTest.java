@@ -153,4 +153,13 @@ public class VL_FSMTest {
 		VL_FSM fsm = new VL_FSM();
 		assertEquals("iA", fsm.data.toString());
 	}
+	
+	@Test
+	public void entryExitActionOrder() {
+		VL_FSM fsm = new VL_FSM();
+		assertEquals("iA", fsm.data.toString());
+		fsm.handleEvent(Event.start);
+		assertEquals("iAoAiSiN", fsm.data.toString());
+	}
+	
 }
