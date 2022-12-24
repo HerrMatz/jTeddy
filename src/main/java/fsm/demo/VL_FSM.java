@@ -41,8 +41,8 @@ public class VL_FSM extends Superstate<Event> {
 
 		public A(VL_FSMState from) {
 			super(from);
-			transitions.put(Event.start, (payload -> ENTER(new Sub(this))));
-			transitions.put(Event.bypass, (payload -> ENTER(new B(this))));
+			TRANSITION(Event.start, (payload -> ENTER(new Sub(this))));
+			TRANSITION(Event.bypass, (payload -> ENTER(new B(this))));
 		}
 	}
 
@@ -54,7 +54,7 @@ public class VL_FSM extends Superstate<Event> {
 
 		public B(VL_FSMState from) {
 			super(from);
-			transitions.put(Event.up, (payload -> ENTER(new Sub(this, new Sub.High(null)))));
+			TRANSITION(Event.up, (payload -> ENTER(new Sub(this, new Sub.High(null)))));
 		}
 	}
 
@@ -71,8 +71,8 @@ public class VL_FSM extends Superstate<Event> {
 
 		public C(State<Event> from) {
 			super(from);
-			transitions.put(Event.bypass, (payload -> ENTER(new D(this))));
-			transitions.put(Event.toF, (payload -> ENTER(new F(this))));
+			TRANSITION(Event.bypass, (payload -> ENTER(new D(this))));
+			TRANSITION(Event.toF, (payload -> ENTER(new F(this))));
 		}
 	}
 
@@ -105,7 +105,7 @@ public class VL_FSM extends Superstate<Event> {
 
 		public E(State<Event> from) {
 			super(from);
-			transitions.put(Event.toF, (payload -> ENTER(new F(this))));
+			TRANSITION(Event.toF, (payload -> ENTER(new F(this))));
 		}
 	}
 
@@ -122,7 +122,7 @@ public class VL_FSM extends Superstate<Event> {
 
 		public F(State<Event> from) {
 			super(from);
-			transitions.put(Event.clear, (payload -> ENTER_DEEP(new Sub(null))));
+			TRANSITION(Event.clear, (payload -> ENTER_DEEP(new Sub(null))));
 		}
 	}
 
@@ -131,7 +131,7 @@ public class VL_FSM extends Superstate<Event> {
 		public static class Normal extends VL_FSMState {
 			public Normal(VL_FSMState from) {
 				super(from);
-				transitions.put(Event.up, (payload -> ENTER(new High(this))));
+				TRANSITION(Event.up, (payload -> ENTER(new High(this))));
 			}
 
 			@Override
@@ -148,10 +148,10 @@ public class VL_FSM extends Superstate<Event> {
 		public static class Low extends VL_FSMState {
 			public Low(VL_FSMState from) {
 				super(from);
-				transitions.put(Event.up, (payload -> ENTER(new High(this))));
-				transitions.put(Event.clear, (payload -> ENTER(new Normal(this))));
-				transitions.put(Event.exceed, (payload -> EXIT()));
-				transitions.put(Event.last, (payload -> EXIT(new C(parent))));
+				TRANSITION(Event.up, (payload -> ENTER(new High(this))));
+				TRANSITION(Event.clear, (payload -> ENTER(new Normal(this))));
+				TRANSITION(Event.exceed, (payload -> EXIT()));
+				TRANSITION(Event.last, (payload -> EXIT(new C(parent))));
 			}
 			@Override
 			public void entryAction() {
@@ -167,8 +167,8 @@ public class VL_FSM extends Superstate<Event> {
 		public static class High extends VL_FSMState {
 			public High(VL_FSMState from) {
 				super(from);
-				transitions.put(Event.down, (payload -> ENTER(new Low(this))));
-				transitions.put(Event.exceed, (payload -> EXIT()));
+				TRANSITION(Event.down, (payload -> ENTER(new Low(this))));
+				TRANSITION(Event.exceed, (payload -> EXIT()));
 			}
 
 			@Override
@@ -199,8 +199,8 @@ public class VL_FSM extends Superstate<Event> {
 
 		public Sub(State<Event> from, VL_FSMState entry) {
 			super(from, entry);
-			transitions.put(Event.reset, (payload -> ENTER(new Sub(this))));
-			transitions.put(Event.error, (payload -> ENTER(new E(this))));
+			TRANSITION(Event.reset, (payload -> ENTER(new Sub(this))));
+			TRANSITION(Event.error, (payload -> ENTER(new E(this))));
 		}
 
 		public Sub(State<Event> from) {
@@ -210,6 +210,8 @@ public class VL_FSM extends Superstate<Event> {
 
 	public VL_FSM() {
 		super(null, null, Event.class);
+		setPauseActionIsExitAction(true);
+		setUnpauseActionIsEntryAction(true);
 		start(new A(null));
 	}
 }

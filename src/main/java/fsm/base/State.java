@@ -11,6 +11,8 @@ public abstract class State<E extends Enum<E>> {
 	protected Map<E, Function<Integer, EventConsumption>> transitions;
 	private boolean isPaused;	// is a substate and its superstate has been exited explicitly
 	private boolean ranEntryAction;
+	private boolean pauseActionIsExitAction;
+	private boolean unpauseActionIsEntryAction;
 
 	public State(Class<E> classEvent) {
 		this(null, classEvent);
@@ -23,6 +25,8 @@ public abstract class State<E extends Enum<E>> {
 			events = other.events;
 			transitions = other.transitions;
 			pausedSubstates = new ArrayList<>();
+			pauseActionIsExitAction = other.pauseActionIsExitAction;
+			unpauseActionIsEntryAction = other.unpauseActionIsEntryAction;
 		}
 		else {
 			parent = null;
@@ -50,18 +54,26 @@ public abstract class State<E extends Enum<E>> {
 		return ret;
 	}
 
+	protected void TRANSITION(E event, Function<Integer, EventConsumption> func) {
+		transitions.put(event, func);
+	}
+
 	protected EventConsumption ENTER(State<E> newState) {
+		newState.setPauseActionIsExitAction(pauseActionIsExitAction);
+		newState.setUnpauseActionIsEntryAction(unpauseActionIsEntryAction);
 		for(var substate : parallelSubstates) {
-			substate.runExitAction();
+			// substate.runExitAction();
+			substate.pause();
 		}
-		runExitAction();
+		// runExitAction();
 		if(parent != null) {
-			if(this instanceof Superstate<E>) {
-				pause();
-				parent.pausedSubstates.add(this);
-			}
-			parent.parallelSubstates.remove(this);
-			parent.parallelSubstates.add(newState);
+			parentSwitchSubstate(this, newState, this instanceof Superstate<E>);
+			// if(this instanceof Superstate<E>) {
+			// 	pause();
+			// 	parent.pausedSubstates.add(this);
+			// }
+			// parent.parallelSubstates.remove(this);
+			// parent.parallelSubstates.add(newState);
 			// newState.parent = parent;
 			// parent = null;
 		}
@@ -74,6 +86,8 @@ public abstract class State<E extends Enum<E>> {
 	}
 
 	protected EventConsumption ENTER_DEEP(State<E> superstate) {
+		superstate.setPauseActionIsExitAction(pauseActionIsExitAction);
+		superstate.setUnpauseActionIsEntryAction(unpauseActionIsEntryAction);
 		boolean deepHistoryFound = false;
 		if(parent != null) {
 			for(var substate : parent.pausedSubstates) {
@@ -91,28 +105,36 @@ public abstract class State<E extends Enum<E>> {
 	}
 
 	protected EventConsumption EXIT() {
-		var ret = EXIT(parent.defaultExit(), true);
-		pausedSubstates.clear();
-		return ret;
+		return EXIT(parent.defaultExit(), true);
+		// var ret = EXIT(parent.defaultExit(), true);
+		// pausedSubstates.clear();
+		// return ret;
 	}
 
 	protected EventConsumption EXIT(State<E> explicitExitState) {
 		return EXIT(explicitExitState, false);
 	}
 
-	private EventConsumption EXIT(State<E> explicitExitState, boolean runExAc) {
+	private EventConsumption EXIT(State<E> explicitExitState, boolean execExitAction) {
+		explicitExitState.setPauseActionIsExitAction(pauseActionIsExitAction);
+		explicitExitState.setUnpauseActionIsEntryAction(unpauseActionIsEntryAction);
 		runExitAction();
-		if(parent != null) {
-			parent.runExitAction();
-			if(parent.parent != null) {
-				// parent.parentSwitchSubstate(parent, explicitExitState);
-				var pp = parent.parent;
-				var list = pp.parallelSubstates;
-				list.set(list.indexOf(parent), explicitExitState);
-				pp.pausedSubstates.add(parent);
-				// parent.parent.pauseSubstates();
-			}
-		}
+		parent.parentSwitchSubstate(parent, explicitExitState, !execExitAction);
+		// if(parent != null) {
+		// 	parent.runExitAction();
+		// 	parent.parentSwitchSubstate(parent, explicitExitState, !execExitAction);
+		// 	// if(parent.parent != null) {
+		// 	// 	// parent.parentSwitchSubstate(parent, explicitExitState);
+		// 	// 	var pp = parent.parent;
+		// 	// 	var list = pp.parallelSubstates;
+		// 	// 	list.set(list.indexOf(parent), explicitExitState);
+		// 	// 	pp.pausedSubstates.add(parent);
+		// 	// 	// parent.parent.pauseSubstates();
+		// 	// }
+		// }
+		// else {
+		// 	throw new IllegalAccessError();
+		// }
 
 		explicitExitState.runEntryAction();
 		return EventConsumption.fullyUsed;
@@ -122,13 +144,20 @@ public abstract class State<E extends Enum<E>> {
 		return null;
 	}
 
-	private void parentSwitchSubstate(State<E> from, State<E> to) {
+	private void parentSwitchSubstate(State<E> from, State<E> to, boolean pauseOldState) {
 		if(parent != null) {
 			var list = parent.parallelSubstates;
 			list.set(list.indexOf(from), to);
-			from.runExitAction();
-			to.parent = from.parent;
-			from.parent = null;
+			// from.runExitAction();
+			// to.parent = from.parent;
+			if(pauseOldState) {
+				parent.pausedSubstates.add(from);
+				from.pause();
+			}
+			else {
+				from.runExitAction();
+			}
+			// from.parent = null;
 		}
 	}
 
@@ -143,16 +172,16 @@ public abstract class State<E extends Enum<E>> {
 		runExitAction();
 	}
 
-	private void pause() {
-		isPaused = true;
-		pauseAction();
-	}
+	// private void pause() {
+	// 	isPaused = true;
+	// 	pauseAction();
+	// }
 
-	private void pauseSubstates() {
-		parallelSubstates.forEach(s -> s.pause());
-		pausedSubstates = parallelSubstates;
-		parallelSubstates = new ArrayList<>();
-	}
+	// private void pauseSubstates() {
+	// 	parallelSubstates.forEach(s -> s.pause());
+	// 	pausedSubstates = parallelSubstates;
+	// 	parallelSubstates = new ArrayList<>();
+	// }
 
 	private void unpause() {
 		isPaused = false;
@@ -196,8 +225,38 @@ public abstract class State<E extends Enum<E>> {
 	}
 	protected void entryAction() {}
 
+	private void pause() {
+		if(pauseActionIsExitAction)
+			exitAction();
+		else
+			pauseAction();
+		isPaused = true;
+	}
 	protected void pauseAction() {}
 
+	private void runUnpauseAction() {
+		if(unpauseActionIsEntryAction)
+			entryAction();
+		else
+			unpauseAction();
+		isPaused = false;
+	}
+
 	protected void unpauseAction() {}
+
+	protected void setPauseActionIsExitAction(boolean b) {
+		pauseActionIsExitAction = b;
+	}
+
+	protected void setUnpauseActionIsEntryAction(boolean b) {
+		unpauseActionIsEntryAction = b;
+	}
+	protected boolean getPauseActionIsExitAction() {
+		return pauseActionIsExitAction;
+	}
+
+	protected boolean getUnpauseActionIsEntryAction() {
+		return unpauseActionIsEntryAction;
+	}
 
 }
