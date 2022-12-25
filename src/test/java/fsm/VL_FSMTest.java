@@ -185,7 +185,7 @@ public class VL_FSMTest {
 		assertEquals("iAoAiSiNoNiHoHiL", fsm.data.toString());
 		fsm.handleEvent(Event.last);
 		assertThat(fsm.getSubstates().get(0), instanceOf(VL_FSM.C.class));
-		assertEquals("iAoAiSiNoNiHoHiLoLoSiC", fsm.data.toString());
+		assertEquals("iAoAiSiNoNiHoHiLpLpSiC", fsm.data.toString());
 	}
 	
 	@Test
@@ -196,7 +196,7 @@ public class VL_FSMTest {
 		assertEquals("iAoAiSiN", fsm.data.toString());
 		fsm.handleEvent(Event.error);
 		assertThat(fsm.getSubstates().get(0), instanceOf(VL_FSM.E.class));
-		assertEquals("iAoAiSiNoNoSiE", fsm.data.toString());
+		assertEquals("iAoAiSiNpNpSiE", fsm.data.toString());
 	}
 	
 	@Test
@@ -211,14 +211,14 @@ public class VL_FSMTest {
 		assertEquals("iAoAiSiNoNiH", fsm.data.toString());
 		fsm.handleEvent(Event.error);
 		assertThat(fsm.getSubstates().get(0), instanceOf(VL_FSM.E.class));
-		assertEquals("iAoAiSiNoNiHoHoSiE", fsm.data.toString());
+		assertEquals("iAoAiSiNoNiHpHpSiE", fsm.data.toString());
 		fsm.handleEvent(Event.toF);
 		assertThat(fsm.getSubstates().get(0), instanceOf(VL_FSM.F.class));
-		assertEquals("iAoAiSiNoNiHoHoSiEoEiF", fsm.data.toString());
+		assertEquals("iAoAiSiNoNiHpHpSiEoEiF", fsm.data.toString());
 		fsm.handleEvent(Event.clear);
 		assertThat(fsm.getSubstates().get(0), instanceOf(VL_FSM.Sub.class));
 		assertThat(fsm.getSubstates().get(0).getSubstates().get(0), instanceOf(VL_FSM.Sub.High.class));
-		assertEquals("iAoAiSiNoNiHoHoSiEoEiFoFiSiH", fsm.data.toString());
+		assertEquals("iAoAiSiNoNiHpHpSiEoEiFoFuSuH", fsm.data.toString());
 	}
 	
 }
