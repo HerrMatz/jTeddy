@@ -136,42 +136,8 @@ public abstract class State<E extends Enum<E>> {
 		}
 	}
 
-	private void hardExit() {
-		if(parent != null) {
-			for(State<E> substate : parallelSubstates) {
-				substate.hardExit();
-			}
-			parallelSubstates.clear();
-			parent = null;
-		}
-		runExitAction();
-	}
-
-	// private void pause() {
-	// 	isPaused = true;
-	// 	pauseAction();
-	// }
-
-	// private void pauseSubstates() {
-	// 	parallelSubstates.forEach(s -> s.pause());
-	// 	pausedSubstates = parallelSubstates;
-	// 	parallelSubstates = new ArrayList<>();
-	// }
-
-	// private void unpause() {
-	// 	isPaused = false;
-	// 	unpauseAction();
-	// }
-
 	private void unpauseSubstates() {
 		pausedSubstates.forEach(s -> s.unpause());
-		// pausedSubstates.forEach(s -> s.unpauseSubstates());
-		// for(var substate : pausedSubstates) {
-		// 	substate.unpause();
-		// }
-		// for(var substate : pausedSubstates) {
-		// 	substate.unpause();
-		// }
 		parallelSubstates = pausedSubstates;
 		pausedSubstates = new ArrayList<>();
 	}
@@ -198,14 +164,12 @@ public abstract class State<E extends Enum<E>> {
 	private void runExitAction() {
 		exitAction();
 	}
-	protected void exitAction() {}
 
 	private void runEntryAction() {
 		if(!ranEntryAction)
 			entryAction();
 		ranEntryAction = true;
 	}
-	protected void entryAction() {}
 
 	private void pause() {
 		if(pauseActionIsExitAction)
@@ -213,8 +177,8 @@ public abstract class State<E extends Enum<E>> {
 		else
 			pauseAction();
 		isPaused = true;
+		// parallelSubstates.forEach(s -> s.pause());
 	}
-	protected void pauseAction() {}
 
 	private void unpause() {
 		if(unpauseActionIsEntryAction) {
@@ -226,8 +190,6 @@ public abstract class State<E extends Enum<E>> {
 		isPaused = false;
 		parallelSubstates.forEach(s -> s.unpause());
 	}
-
-	protected void unpauseAction() {}
 
 	protected void setPauseActionIsExitAction(boolean b) {
 		pauseActionIsExitAction = b;
@@ -244,4 +206,8 @@ public abstract class State<E extends Enum<E>> {
 		return unpauseActionIsEntryAction;
 	}
 
+	protected void entryAction() {}
+	protected void exitAction() {}
+	protected void pauseAction() {}
+	protected void unpauseAction() {}
 }
