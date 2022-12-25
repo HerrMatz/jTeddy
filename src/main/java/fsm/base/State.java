@@ -21,7 +21,7 @@ public abstract class State<E extends Enum<E>> {
 			events = other.events;
 			transitions = other.transitions;
 			pausedSubstates = new ArrayList<>();
-			other.copyActionConfig(this);
+			other.copyActionConfigTo(this);
 		}
 		else {
 			parent = null;
@@ -54,7 +54,7 @@ public abstract class State<E extends Enum<E>> {
 	}
 
 	protected EventConsumption ENTER(State<E> newState) {
-		copyActionConfig(newState);
+		copyActionConfigTo(newState);
 		if(parent != null) {
 			parentSwitchSubstate(this, newState, this instanceof Superstate<E>);
 		}
@@ -62,7 +62,7 @@ public abstract class State<E extends Enum<E>> {
 	}
 
 	protected EventConsumption ENTER_DEEP(State<E> stateWithHistory) {
-		copyActionConfig(stateWithHistory);
+		copyActionConfigTo(stateWithHistory);
 		if(this instanceof Superstate<E>) {
 			pauseSubstates();
 		}
@@ -94,7 +94,7 @@ public abstract class State<E extends Enum<E>> {
 	}
 
 	private EventConsumption EXIT(State<E> explicitExitState, boolean execExitAction) {
-		copyActionConfig(explicitExitState);
+		copyActionConfigTo(explicitExitState);
 		parent.parentSwitchSubstate(parent, explicitExitState, !execExitAction && parent instanceof Superstate<E>);
 		return EventConsumption.fullyUsed;
 	}
@@ -159,7 +159,7 @@ public abstract class State<E extends Enum<E>> {
 	}
 
 	// pkg private for access only in Superstate
-	void copyActionConfig(State<E> other) {
+	void copyActionConfigTo(State<E> other) {
 		other.setPauseActionIsExitAction(pauseActionIsExitAction);
 		other.setUnpauseActionIsEntryAction(unpauseActionIsEntryAction);
 	}
