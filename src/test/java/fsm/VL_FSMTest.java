@@ -6,8 +6,9 @@ import static org.hamcrest.CoreMatchers.instanceOf;
 
 import org.junit.Test;
 
-import fsm.demo.Event;
-import fsm.demo.VL_FSM;
+import fsm.examples.VL.Event;
+import fsm.examples.VL.Sub;
+import fsm.examples.VL.VL_FSM;
 
 public class VL_FSMTest {
 	
@@ -25,20 +26,20 @@ public class VL_FSMTest {
 		VL_FSM fsm = new VL_FSM();
 		assertThat(fsm.getSubstates().get(0), instanceOf(VL_FSM.A.class));
 		fsm.handleEvent(Event.start);
-		assertThat(fsm.getSubstates().get(0), instanceOf(VL_FSM.Sub.class));
-		assertThat(fsm.getSubstates().get(0).getSubstates().get(0), instanceOf(VL_FSM.Sub.Normal.class));
+		assertThat(fsm.getSubstates().get(0), instanceOf(Sub.class));
+		assertThat(fsm.getSubstates().get(0).getSubstates().get(0), instanceOf(Sub.Normal.class));
 		fsm.handleEvent(Event.up);
-		assertThat(fsm.getSubstates().get(0), instanceOf(VL_FSM.Sub.class));
-		assertThat(fsm.getSubstates().get(0).getSubstates().get(0), instanceOf(VL_FSM.Sub.High.class));
+		assertThat(fsm.getSubstates().get(0), instanceOf(Sub.class));
+		assertThat(fsm.getSubstates().get(0).getSubstates().get(0), instanceOf(Sub.High.class));
 		fsm.handleEvent(Event.down);
-		assertThat(fsm.getSubstates().get(0), instanceOf(VL_FSM.Sub.class));
-		assertThat(fsm.getSubstates().get(0).getSubstates().get(0), instanceOf(VL_FSM.Sub.Low.class));
+		assertThat(fsm.getSubstates().get(0), instanceOf(Sub.class));
+		assertThat(fsm.getSubstates().get(0).getSubstates().get(0), instanceOf(Sub.Low.class));
 		fsm.handleEvent(Event.clear);
-		assertThat(fsm.getSubstates().get(0), instanceOf(VL_FSM.Sub.class));
-		assertThat(fsm.getSubstates().get(0).getSubstates().get(0), instanceOf(VL_FSM.Sub.Normal.class));
+		assertThat(fsm.getSubstates().get(0), instanceOf(Sub.class));
+		assertThat(fsm.getSubstates().get(0).getSubstates().get(0), instanceOf(Sub.Normal.class));
 		fsm.handleEvent(Event.tick);
-		assertThat(fsm.getSubstates().get(0), instanceOf(VL_FSM.Sub.class));
-		assertThat(fsm.getSubstates().get(0).getSubstates().get(0), instanceOf(VL_FSM.Sub.Normal.class));
+		assertThat(fsm.getSubstates().get(0), instanceOf(Sub.class));
+		assertThat(fsm.getSubstates().get(0).getSubstates().get(0), instanceOf(Sub.Normal.class));
 		assertEquals(1, fsm.getSubstates().size());
 		assertEquals(1, fsm.getSubstates().get(0).getSubstates().size());
 	}
@@ -50,8 +51,8 @@ public class VL_FSMTest {
 		fsm.handleEvent(Event.bypass);
 		assertThat(fsm.getSubstates().get(0), instanceOf(VL_FSM.B.class));
 		fsm.handleEvent(Event.up);
-		assertThat(fsm.getSubstates().get(0), instanceOf(VL_FSM.Sub.class));
-		assertThat(fsm.getSubstates().get(0).getSubstates().get(0), instanceOf(VL_FSM.Sub.High.class));
+		assertThat(fsm.getSubstates().get(0), instanceOf(Sub.class));
+		assertThat(fsm.getSubstates().get(0).getSubstates().get(0), instanceOf(Sub.High.class));
 		assertEquals(1, fsm.getSubstates().size());
 		assertEquals(1, fsm.getSubstates().get(0).getSubstates().size());
 	}
@@ -61,8 +62,8 @@ public class VL_FSMTest {
 		VL_FSM fsm = new VL_FSM();
 		assertThat(fsm.getSubstates().get(0), instanceOf(VL_FSM.A.class));
 		fsm.handleEvent(Event.start);
-		assertThat(fsm.getSubstates().get(0), instanceOf(VL_FSM.Sub.class));
-		assertThat(fsm.getSubstates().get(0).getSubstates().get(0), instanceOf(VL_FSM.Sub.Normal.class));
+		assertThat(fsm.getSubstates().get(0), instanceOf(Sub.class));
+		assertThat(fsm.getSubstates().get(0).getSubstates().get(0), instanceOf(Sub.Normal.class));
 		fsm.handleEvent(Event.error);
 		assertThat(fsm.getSubstates().get(0), instanceOf(VL_FSM.E.class));
 		assertEquals(1, fsm.getSubstates().size());
@@ -73,14 +74,14 @@ public class VL_FSMTest {
 		VL_FSM fsm = new VL_FSM();
 		assertThat(fsm.getSubstates().get(0), instanceOf(VL_FSM.A.class));
 		fsm.handleEvent(Event.start);
-		assertThat(fsm.getSubstates().get(0), instanceOf(VL_FSM.Sub.class));
-		assertThat(fsm.getSubstates().get(0).getSubstates().get(0), instanceOf(VL_FSM.Sub.Normal.class));
+		assertThat(fsm.getSubstates().get(0), instanceOf(Sub.class));
+		assertThat(fsm.getSubstates().get(0).getSubstates().get(0), instanceOf(Sub.Normal.class));
 		fsm.handleEvent(Event.up);
-		assertThat(fsm.getSubstates().get(0), instanceOf(VL_FSM.Sub.class));
-		assertThat(fsm.getSubstates().get(0).getSubstates().get(0), instanceOf(VL_FSM.Sub.High.class));
+		assertThat(fsm.getSubstates().get(0), instanceOf(Sub.class));
+		assertThat(fsm.getSubstates().get(0).getSubstates().get(0), instanceOf(Sub.High.class));
 		fsm.handleEvent(Event.down);
-		assertThat(fsm.getSubstates().get(0), instanceOf(VL_FSM.Sub.class));
-		assertThat(fsm.getSubstates().get(0).getSubstates().get(0), instanceOf(VL_FSM.Sub.Low.class));
+		assertThat(fsm.getSubstates().get(0), instanceOf(Sub.class));
+		assertThat(fsm.getSubstates().get(0).getSubstates().get(0), instanceOf(Sub.Low.class));
 		fsm.handleEvent(Event.last);
 		assertThat(fsm.getSubstates().get(0), instanceOf(VL_FSM.C.class));
 		assertEquals(1, fsm.getSubstates().size());
@@ -91,11 +92,11 @@ public class VL_FSMTest {
 		VL_FSM fsm = new VL_FSM();
 		assertThat(fsm.getSubstates().get(0), instanceOf(VL_FSM.A.class));
 		fsm.handleEvent(Event.start);
-		assertThat(fsm.getSubstates().get(0), instanceOf(VL_FSM.Sub.class));
-		assertThat(fsm.getSubstates().get(0).getSubstates().get(0), instanceOf(VL_FSM.Sub.Normal.class));
+		assertThat(fsm.getSubstates().get(0), instanceOf(Sub.class));
+		assertThat(fsm.getSubstates().get(0).getSubstates().get(0), instanceOf(Sub.Normal.class));
 		fsm.handleEvent(Event.up);
-		assertThat(fsm.getSubstates().get(0), instanceOf(VL_FSM.Sub.class));
-		assertThat(fsm.getSubstates().get(0).getSubstates().get(0), instanceOf(VL_FSM.Sub.High.class));
+		assertThat(fsm.getSubstates().get(0), instanceOf(Sub.class));
+		assertThat(fsm.getSubstates().get(0).getSubstates().get(0), instanceOf(Sub.High.class));
 		fsm.handleEvent(Event.exceed);
 		assertThat(fsm.getSubstates().get(0), instanceOf(VL_FSM.D.class));
 		assertEquals(1, fsm.getSubstates().size());
@@ -106,22 +107,22 @@ public class VL_FSMTest {
 		VL_FSM fsm = new VL_FSM();
 		assertThat(fsm.getSubstates().get(0), instanceOf(VL_FSM.A.class));
 		fsm.handleEvent(Event.start);
-		assertThat(fsm.getSubstates().get(0), instanceOf(VL_FSM.Sub.class));
-		assertThat(fsm.getSubstates().get(0).getSubstates().get(0), instanceOf(VL_FSM.Sub.Normal.class));
+		assertThat(fsm.getSubstates().get(0), instanceOf(Sub.class));
+		assertThat(fsm.getSubstates().get(0).getSubstates().get(0), instanceOf(Sub.Normal.class));
 		fsm.handleEvent(Event.up);
-		assertThat(fsm.getSubstates().get(0), instanceOf(VL_FSM.Sub.class));
-		assertThat(fsm.getSubstates().get(0).getSubstates().get(0), instanceOf(VL_FSM.Sub.High.class));
+		assertThat(fsm.getSubstates().get(0), instanceOf(Sub.class));
+		assertThat(fsm.getSubstates().get(0).getSubstates().get(0), instanceOf(Sub.High.class));
 		fsm.handleEvent(Event.down);
-		assertThat(fsm.getSubstates().get(0), instanceOf(VL_FSM.Sub.class));
-		assertThat(fsm.getSubstates().get(0).getSubstates().get(0), instanceOf(VL_FSM.Sub.Low.class));
+		assertThat(fsm.getSubstates().get(0), instanceOf(Sub.class));
+		assertThat(fsm.getSubstates().get(0).getSubstates().get(0), instanceOf(Sub.Low.class));
 		fsm.handleEvent(Event.last);
 		assertThat(fsm.getSubstates().get(0), instanceOf(VL_FSM.C.class));
 
 		fsm.handleEvent(Event.toF);
 		assertThat(fsm.getSubstates().get(0), instanceOf(VL_FSM.F.class));
 		fsm.handleEvent(Event.clear);
-		assertThat(fsm.getSubstates().get(0), instanceOf(VL_FSM.Sub.class));
-		assertThat(fsm.getSubstates().get(0).getSubstates().get(0), instanceOf(VL_FSM.Sub.Low.class));
+		assertThat(fsm.getSubstates().get(0), instanceOf(Sub.class));
+		assertThat(fsm.getSubstates().get(0).getSubstates().get(0), instanceOf(Sub.Low.class));
 		assertEquals(1, fsm.getSubstates().size());
 		assertEquals(1, fsm.getSubstates().get(0).getSubstates().size());
 	}
@@ -131,19 +132,19 @@ public class VL_FSMTest {
 		VL_FSM fsm = new VL_FSM();
 		assertThat(fsm.getSubstates().get(0), instanceOf(VL_FSM.A.class));
 		fsm.handleEvent(Event.start);
-		assertThat(fsm.getSubstates().get(0), instanceOf(VL_FSM.Sub.class));
-		assertThat(fsm.getSubstates().get(0).getSubstates().get(0), instanceOf(VL_FSM.Sub.Normal.class));
+		assertThat(fsm.getSubstates().get(0), instanceOf(Sub.class));
+		assertThat(fsm.getSubstates().get(0).getSubstates().get(0), instanceOf(Sub.Normal.class));
 		fsm.handleEvent(Event.up);
-		assertThat(fsm.getSubstates().get(0), instanceOf(VL_FSM.Sub.class));
-		assertThat(fsm.getSubstates().get(0).getSubstates().get(0), instanceOf(VL_FSM.Sub.High.class));
+		assertThat(fsm.getSubstates().get(0), instanceOf(Sub.class));
+		assertThat(fsm.getSubstates().get(0).getSubstates().get(0), instanceOf(Sub.High.class));
 		fsm.handleEvent(Event.error);
 		assertThat(fsm.getSubstates().get(0), instanceOf(VL_FSM.E.class));
 
 		fsm.handleEvent(Event.toF);
 		assertThat(fsm.getSubstates().get(0), instanceOf(VL_FSM.F.class));
 		fsm.handleEvent(Event.clear);
-		assertThat(fsm.getSubstates().get(0), instanceOf(VL_FSM.Sub.class));
-		assertThat(fsm.getSubstates().get(0).getSubstates().get(0), instanceOf(VL_FSM.Sub.High.class));
+		assertThat(fsm.getSubstates().get(0), instanceOf(Sub.class));
+		assertThat(fsm.getSubstates().get(0).getSubstates().get(0), instanceOf(Sub.High.class));
 		assertEquals(1, fsm.getSubstates().size());
 		assertEquals(1, fsm.getSubstates().get(0).getSubstates().size());
 	}
@@ -161,8 +162,8 @@ public class VL_FSMTest {
 		fsm.handleEvent(Event.start);
 		assertEquals("iAoAiSiN", fsm.data.toString());
 		fsm.handleEvent(Event.up);
-		assertThat(fsm.getSubstates().get(0), instanceOf(VL_FSM.Sub.class));
-		assertThat(fsm.getSubstates().get(0).getSubstates().get(0), instanceOf(VL_FSM.Sub.High.class));
+		assertThat(fsm.getSubstates().get(0), instanceOf(Sub.class));
+		assertThat(fsm.getSubstates().get(0).getSubstates().get(0), instanceOf(Sub.High.class));
 		assertEquals("iAoAiSiNoNiH", fsm.data.toString());
 		fsm.handleEvent(Event.exceed);
 		assertThat(fsm.getSubstates().get(0), instanceOf(VL_FSM.D.class));
@@ -176,12 +177,12 @@ public class VL_FSMTest {
 		fsm.handleEvent(Event.start);
 		assertEquals("iAoAiSiN", fsm.data.toString());
 		fsm.handleEvent(Event.up);
-		assertThat(fsm.getSubstates().get(0), instanceOf(VL_FSM.Sub.class));
-		assertThat(fsm.getSubstates().get(0).getSubstates().get(0), instanceOf(VL_FSM.Sub.High.class));
+		assertThat(fsm.getSubstates().get(0), instanceOf(Sub.class));
+		assertThat(fsm.getSubstates().get(0).getSubstates().get(0), instanceOf(Sub.High.class));
 		assertEquals("iAoAiSiNoNiH", fsm.data.toString());
 		fsm.handleEvent(Event.down);
-		assertThat(fsm.getSubstates().get(0), instanceOf(VL_FSM.Sub.class));
-		assertThat(fsm.getSubstates().get(0).getSubstates().get(0), instanceOf(VL_FSM.Sub.Low.class));
+		assertThat(fsm.getSubstates().get(0), instanceOf(Sub.class));
+		assertThat(fsm.getSubstates().get(0).getSubstates().get(0), instanceOf(Sub.Low.class));
 		assertEquals("iAoAiSiNoNiHoHiL", fsm.data.toString());
 		fsm.handleEvent(Event.last);
 		assertThat(fsm.getSubstates().get(0), instanceOf(VL_FSM.C.class));
@@ -206,8 +207,8 @@ public class VL_FSMTest {
 		fsm.handleEvent(Event.start);
 		assertEquals("iAoAiSiN", fsm.data.toString());
 		fsm.handleEvent(Event.up);
-		assertThat(fsm.getSubstates().get(0), instanceOf(VL_FSM.Sub.class));
-		assertThat(fsm.getSubstates().get(0).getSubstates().get(0), instanceOf(VL_FSM.Sub.High.class));
+		assertThat(fsm.getSubstates().get(0), instanceOf(Sub.class));
+		assertThat(fsm.getSubstates().get(0).getSubstates().get(0), instanceOf(Sub.High.class));
 		assertEquals("iAoAiSiNoNiH", fsm.data.toString());
 		fsm.handleEvent(Event.error);
 		assertThat(fsm.getSubstates().get(0), instanceOf(VL_FSM.E.class));
@@ -216,8 +217,8 @@ public class VL_FSMTest {
 		assertThat(fsm.getSubstates().get(0), instanceOf(VL_FSM.F.class));
 		assertEquals("iAoAiSiNoNiHpHpSiEoEiF", fsm.data.toString());
 		fsm.handleEvent(Event.clear);
-		assertThat(fsm.getSubstates().get(0), instanceOf(VL_FSM.Sub.class));
-		assertThat(fsm.getSubstates().get(0).getSubstates().get(0), instanceOf(VL_FSM.Sub.High.class));
+		assertThat(fsm.getSubstates().get(0), instanceOf(Sub.class));
+		assertThat(fsm.getSubstates().get(0).getSubstates().get(0), instanceOf(Sub.High.class));
 		assertEquals("iAoAiSiNoNiHpHpSiEoEiFoFuSuH", fsm.data.toString());
 	}
 	
