@@ -21,7 +21,7 @@ public abstract class State<E extends Enum<E>> {
 			events = other.events;
 			transitions = other.transitions;
 			pausedSubstates = new ArrayList<>();
-			copyActionConfig(other);
+			other.copyActionConfig(this);
 		}
 		else {
 			parent = null;
