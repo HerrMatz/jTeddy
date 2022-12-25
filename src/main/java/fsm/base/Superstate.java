@@ -5,6 +5,7 @@ public class Superstate<E extends Enum<E>> extends State<E> {
 	public Superstate(State<E> from, State<E> sub, Class<E> classEvent) {
 		super(from, classEvent);
 		if(sub != null) {
+			copyActionConfig(sub);
 			// sub.setPauseActionIsExitAction(getPauseActionIsExitAction());
 			// sub.setUnpauseActionIsEntryAction(getUnpauseActionIsEntryAction());
 			parallelSubstates.add(sub);
@@ -13,6 +14,7 @@ public class Superstate<E extends Enum<E>> extends State<E> {
 	}
 
 	public void start(State<E> s) {
+		copyActionConfig(s);
 		// s.setPauseActionIsExitAction(getPauseActionIsExitAction());
 		// s.setUnpauseActionIsEntryAction(getUnpauseActionIsEntryAction());
 		parallelSubstates.add(s);
