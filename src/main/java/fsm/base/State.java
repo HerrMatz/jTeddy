@@ -61,30 +61,15 @@ public abstract class State<E extends Enum<E>> {
 	protected EventConsumption ENTER(State<E> newState) {
 		// newState.setPauseActionIsExitAction(pauseActionIsExitAction);
 		// newState.setUnpauseActionIsEntryAction(unpauseActionIsEntryAction);
-		// for(var substate : parallelSubstates) {
-		// 	// substate.runExitAction();
-		// 	substate.pause();
-		// }
-		// runExitAction();
 		if(parent != null) {
 			parentSwitchSubstate(this, newState, this instanceof Superstate<E>);
 		}
-		// pauseSubstates();
-		// newState.runEntryAction();
-		// newState.runEntryActionRecurse();
-		// for(var substate : newState.parallelSubstates) {
-		// 	substate.runEntryAction();
-		// }
 		return EventConsumption.fullyUsed;
 	}
 
 	protected EventConsumption ENTER_DEEP(State<E> stateWithHistory) {
 		// stateWithHistory.setPauseActionIsExitAction(pauseActionIsExitAction);
 		// stateWithHistory.setUnpauseActionIsEntryAction(unpauseActionIsEntryAction);
-		// for(var substate : parallelSubstates) {
-		// 	// substate.runExitAction();
-		// 	substate.pause();
-		// }
 		if(this instanceof Superstate<E>) {
 			pauseSubstates();
 		}
@@ -94,10 +79,6 @@ public abstract class State<E extends Enum<E>> {
 			for(var substate : parent.pausedSubstates) {
 				if(stateWithHistory.getClass().equals(substate.getClass())) {
 					historyState = substate;
-					// parent.unpauseSubstates();
-					// substate.unpause();
-					// substate.unpauseSubstates();
-					// deepHistoryFound = true;
 					break;
 				}
 			}
@@ -105,7 +86,6 @@ public abstract class State<E extends Enum<E>> {
 		if(historyState != null) {
 			parent.pausedSubstates.remove(historyState);
 			parentSwitchSubstate(this, historyState, this instanceof Superstate<E>);
-			// parent.parallelSubstates.add(historyState);
 		}
 		else {
 			return ENTER(stateWithHistory);
@@ -124,10 +104,7 @@ public abstract class State<E extends Enum<E>> {
 	private EventConsumption EXIT(State<E> explicitExitState, boolean execExitAction) {
 		// explicitExitState.setPauseActionIsExitAction(pauseActionIsExitAction);
 		// explicitExitState.setUnpauseActionIsEntryAction(unpauseActionIsEntryAction);
-		// runExitAction();
-		// parent.parentSwitchSubstate(parent, explicitExitState, !execExitAction);
 		parent.parentSwitchSubstate(parent, explicitExitState, !execExitAction && parent instanceof Superstate<E>);
-		// explicitExitState.runEntryAction();
 		return EventConsumption.fullyUsed;
 	}
 
@@ -145,7 +122,6 @@ public abstract class State<E extends Enum<E>> {
 				from.pause();
 			}
 			else {
-				// from.runExitAction();
 				from.runExitActionRecurse();
 			}
 		}
@@ -221,7 +197,6 @@ public abstract class State<E extends Enum<E>> {
 		// else
 			pauseAction();
 		isPaused = true;
-		// parallelSubstates.forEach(s -> s.pause());
 	}
 
 	private void unpause() {
@@ -232,7 +207,6 @@ public abstract class State<E extends Enum<E>> {
 			unpauseAction();
 		// }
 		isPaused = false;
-		// parallelSubstates.forEach(s -> s.unpause());
 	}
 
 	// protected void setPauseActionIsExitAction(boolean b) {
