@@ -49,8 +49,14 @@ public class VL_FSM extends Superstate<Event> {
 	public static class B extends VL_FSMState {
 		@Override
 		public void entryAction() {
-			System.out.println("Bin in B");
+			get(VL_FSM.class, StringBuilder.class, "data").append("iB");
 		}
+
+		@Override
+		public void exitAction() {
+			get(VL_FSM.class, StringBuilder.class, "data").append("oB");
+		}
+
 
 		public B(VL_FSMState from) {
 			super(from);

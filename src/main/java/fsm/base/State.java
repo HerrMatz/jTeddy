@@ -80,6 +80,11 @@ public abstract class State<E extends Enum<E>> {
 	protected EventConsumption ENTER_DEEP(State<E> stateWithHistory) {
 		stateWithHistory.setPauseActionIsExitAction(pauseActionIsExitAction);
 		stateWithHistory.setUnpauseActionIsEntryAction(unpauseActionIsEntryAction);
+		for(var substate : parallelSubstates) {
+			// substate.runExitAction();
+			substate.pause();
+		}
+		runExitAction();
 		boolean deepHistoryFound = false;
 		if(parent != null) {
 			for(var substate : parent.pausedSubstates) {
@@ -153,13 +158,20 @@ public abstract class State<E extends Enum<E>> {
 	// 	parallelSubstates = new ArrayList<>();
 	// }
 
-	private void unpause() {
-		isPaused = false;
-		pauseAction();
-	}
+	// private void unpause() {
+	// 	isPaused = false;
+	// 	unpauseAction();
+	// }
 
 	private void unpauseSubstates() {
 		pausedSubstates.forEach(s -> s.unpause());
+		// pausedSubstates.forEach(s -> s.unpauseSubstates());
+		// for(var substate : pausedSubstates) {
+		// 	substate.unpause();
+		// }
+		// for(var substate : pausedSubstates) {
+		// 	substate.unpause();
+		// }
 		parallelSubstates = pausedSubstates;
 		pausedSubstates = new ArrayList<>();
 	}
@@ -204,12 +216,15 @@ public abstract class State<E extends Enum<E>> {
 	}
 	protected void pauseAction() {}
 
-	private void runUnpauseAction() {
-		if(unpauseActionIsEntryAction)
+	private void unpause() {
+		if(unpauseActionIsEntryAction) {
 			entryAction();
-		else
+		}
+		else {
 			unpauseAction();
+		}
 		isPaused = false;
+		parallelSubstates.forEach(s -> s.unpause());
 	}
 
 	protected void unpauseAction() {}
