@@ -39,15 +39,47 @@ public abstract class State<E extends Enum<E>> {
 			transitions.put(event, (payload -> EventConsumption.unused));
 	}
 
+	/**
+	 * Hands down the event to most low level substate. Are multiple parallel substates present, only the first receives the event
+	 * @param event
+	 * @return
+	 */
 	public EventConsumption handleEvent(E event) {
 		EventConsumption ret = EventConsumption.unused;
 		for(State<E> state : parallelSubstates) {
-			if(state.parallelSubstates.isEmpty() || (ret = state.handleEvent(event)) != EventConsumption.fullyUsed){
+			if(ret != EventConsumption.fullyUsed && (state.parallelSubstates.isEmpty() || (ret = state.handleEvent(event)) != EventConsumption.fullyUsed)) {
 				ret = state.transitions.get(event).apply(0);
+				if(ret == EventConsumption.fullyUsed) {
+					return ret;
+				}
 			}
 		}
 		return ret;
 	}
+
+	// /**
+	//  * 
+	//  * @param hierarchyLevel 0 == substates of this state
+	//  * @param nOrthogonal number of the required orthogonal (parallel) substate
+	//  * @return required substate
+	//  * @throws IndexOutOfBoundsExeption when the queried level does not have the nOrtogonal substate
+	//  */
+	// public State<E> getSubstate(int hierarchyLevel, int nOrthogonal) throws IndexOutOfBoundsException {
+	// 	for(State<E> sub : parallelSubstates) {
+	// 		return 
+	// 	}
+	// 	// if(hierarchyLevel == 0) {
+	// 	// 	return parallelSubstates.get(nOrthogonal);
+	// 	// }
+	// 	return getSubstates(hierarchyLevel).get(nOrthogonal);
+	// }
+
+	// public List<State<E>> getSubstates(int hierarchyLevel) throws IndexOutOfBoundsException {
+	// 	if(hierarchyLevel == 0) {
+	// 		return parallelSubstates;
+	// 	}
+	// 	return parallelSubstates.get(0).getSubstates(hierarchyLevel - 1);
+	// }
 
 	protected void TRANSITION(E event, Function<Integer, EventConsumption> func) {
 		transitions.put(event, func);

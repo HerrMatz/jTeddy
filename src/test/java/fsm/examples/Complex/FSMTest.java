@@ -22,4 +22,26 @@ public class FSMTest {
 		assertThat(fsm.getSubstate(0).getSubstate(1).getSubstate(0), instanceOf(Active.Sub2.C.class));
 	}
 
+	@Test
+	public void orthogonalDefaultExit() {
+		FSM fsm = new FSM();
+		assertThat(fsm.getSubstate(0), instanceOf(FSM.Init.class));
+		fsm.handleEvent(Event.start);
+		fsm.handleEvent(Event.advance);
+		assertEquals(1, fsm.getSubstates().size());
+		assertEquals(2, fsm.getSubstate(0).getSubstates().size());
+		assertThat(fsm.getSubstate(0).getSubstate(0), instanceOf(Active.Sub1.class));
+		assertThat(fsm.getSubstate(0).getSubstate(1), instanceOf(Active.Sub2.class));
+		assertThat(fsm.getSubstate(0).getSubstate(0).getSubstate(0), instanceOf(Active.Sub1.B.class));
+		assertThat(fsm.getSubstate(0).getSubstate(0).getSubstate(0).getSubstate(0), instanceOf(Active.Sub1.B.B1.class));
+		assertThat(fsm.getSubstate(0).getSubstate(1).getSubstate(0), instanceOf(Active.Sub2.C.class));
+		fsm.handleEvent(Event.advance);
+		assertThat(fsm.getSubstate(0).getSubstate(0), instanceOf(Active.Sub1.class));
+		assertThat(fsm.getSubstate(0).getSubstate(1), instanceOf(Active.Sub2.class));
+		assertThat(fsm.getSubstate(0).getSubstate(0).getSubstate(0), instanceOf(Active.Sub1.B.class));
+		assertThat(fsm.getSubstate(0).getSubstate(0).getSubstate(0).getSubstate(0), instanceOf(Active.Sub1.B.B2.class));
+		assertThat(fsm.getSubstate(0).getSubstate(1).getSubstate(0), instanceOf(Active.Sub2.C.class));
+
+	}
+
 }
