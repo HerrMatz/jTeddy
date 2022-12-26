@@ -50,12 +50,13 @@ public abstract class State<E extends Enum<E>> {
 		for (State<E> state : parallelSubstates) {
 			if (ret == EventConsumption.fullyUsed) { // ret may be altered by recursive calls since they same the share
 														// EventConsumption instance
-				return ret;
+				break;
 			}
 			if (state.parallelSubstates.isEmpty() || (ret = state.handleEvent(event)) != EventConsumption.fullyUsed) {
 				ret = state.transitions.get(event).apply(0);
 			}
 		}
+		parallelSubstates.removeIf(state -> state == null);
 		return ret;
 	}
 
@@ -122,7 +123,17 @@ public abstract class State<E extends Enum<E>> {
 	}
 
 	protected EventConsumption EXIT() {
-		return EXIT(parent.defaultExit(), true);
+		var exitTo = parent.defaultExit();
+		if(exitTo == null) {
+			return parent.EXIT();
+		}
+		else if(parent.parallelSubstates.size() > 1) {
+			var list = parent.parallelSubstates;
+			list.set(list.indexOf(this), null);
+			runExitActionRecurse();
+			return EventConsumption.fullyUsed;
+		}
+		return EXIT(exitTo, true);
 	}
 
 	protected EventConsumption EXIT(State<E> explicitExitState) {
@@ -198,8 +209,10 @@ public abstract class State<E extends Enum<E>> {
 
 	// pkg private for access only in Superstate
 	void copyActionConfigTo(State<E> other) {
-		other.setPauseActionIsExitAction(pauseActionIsExitAction);
-		other.setUnpauseActionIsEntryAction(unpauseActionIsEntryAction);
+		if(other != null) {
+			other.setPauseActionIsExitAction(pauseActionIsExitAction);
+			other.setUnpauseActionIsEntryAction(unpauseActionIsEntryAction);
+		}
 	}
 
 	private void runExitActionRecurse() {

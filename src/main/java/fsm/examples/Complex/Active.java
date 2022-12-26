@@ -11,6 +11,11 @@ public class Active extends Superstate<Event> {
 		super(from, List.of(new Sub1(null), new Sub2(null)), Event.class);
 	}
 
+	@Override
+	protected State<Event> defaultExit() {
+		return new FSM.Inactive(this);
+	}
+
 	public static class Sub1 extends Superstate<Event> {
 		public Sub1(State<Event> from) {
 			super(from, new A(null), Event.class);
