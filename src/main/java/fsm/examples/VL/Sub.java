@@ -8,19 +8,19 @@ public class Sub extends Superstate<Event> {
 	public static class Normal extends State<Event> {
 		@Override
 		public void entryAction() {
-			get(VL_FSM.class, StringBuilder.class, "data").append("iN");
+			get(FSM.class, StringBuilder.class, "data").append("iN");
 		}
 		@Override
 		public void exitAction() {
-			get(VL_FSM.class, StringBuilder.class, "data").append("oN");
+			get(FSM.class, StringBuilder.class, "data").append("oN");
 		}
 		@Override
 		public void pauseAction() {
-			get(VL_FSM.class, StringBuilder.class, "data").append("pN");
+			get(FSM.class, StringBuilder.class, "data").append("pN");
 		}
 		@Override
 		public void unpauseAction() {
-			get(VL_FSM.class, StringBuilder.class, "data").append("uN");
+			get(FSM.class, StringBuilder.class, "data").append("uN");
 		}
 
 		public Normal(State<Event> from) {
@@ -32,19 +32,19 @@ public class Sub extends Superstate<Event> {
 	public static class Low extends State<Event> {
 		@Override
 		public void entryAction() {
-			get(VL_FSM.class, StringBuilder.class, "data").append("iL");
+			get(FSM.class, StringBuilder.class, "data").append("iL");
 		}
 		@Override
 		public void exitAction() {
-			get(VL_FSM.class, StringBuilder.class, "data").append("oL");
+			get(FSM.class, StringBuilder.class, "data").append("oL");
 		}
 		@Override
 		public void pauseAction() {
-			get(VL_FSM.class, StringBuilder.class, "data").append("pL");
+			get(FSM.class, StringBuilder.class, "data").append("pL");
 		}
 		@Override
 		public void unpauseAction() {
-			get(VL_FSM.class, StringBuilder.class, "data").append("uL");
+			get(FSM.class, StringBuilder.class, "data").append("uL");
 		}
 
 		public Low(State<Event> from) {
@@ -52,26 +52,26 @@ public class Sub extends Superstate<Event> {
 			TRANSITION(Event.up, (payload -> ENTER(new High(this))));
 			TRANSITION(Event.clear, (payload -> ENTER(new Normal(this))));
 			TRANSITION(Event.exceed, (payload -> EXIT()));
-			TRANSITION(Event.last, (payload -> EXIT(new VL_FSM.C(parent))));
+			TRANSITION(Event.last, (payload -> EXIT(new FSM.C(parent))));
 		}
 	}
 
 	public static class High extends State<Event> {
 		@Override
 		public void entryAction() {
-			get(VL_FSM.class, StringBuilder.class, "data").append("iH");
+			get(FSM.class, StringBuilder.class, "data").append("iH");
 		}
 		@Override
 		public void exitAction() {
-			get(VL_FSM.class, StringBuilder.class, "data").append("oH");
+			get(FSM.class, StringBuilder.class, "data").append("oH");
 		}
 		@Override
 		public void pauseAction() {
-			get(VL_FSM.class, StringBuilder.class, "data").append("pH");
+			get(FSM.class, StringBuilder.class, "data").append("pH");
 		}
 		@Override
 		public void unpauseAction() {
-			get(VL_FSM.class, StringBuilder.class, "data").append("uH");
+			get(FSM.class, StringBuilder.class, "data").append("uH");
 		}
 
 		public High(State<Event> from) {
@@ -83,30 +83,30 @@ public class Sub extends Superstate<Event> {
 
 	@Override
 	public void entryAction() {
-		get(VL_FSM.class, StringBuilder.class, "data").append("iS");
+		get(FSM.class, StringBuilder.class, "data").append("iS");
 	}
 	@Override
 	public void exitAction() {
-		get(VL_FSM.class, StringBuilder.class, "data").append("oS");
+		get(FSM.class, StringBuilder.class, "data").append("oS");
 	}
 	@Override
 	public void pauseAction() {
-		get(VL_FSM.class, StringBuilder.class, "data").append("pS");
+		get(FSM.class, StringBuilder.class, "data").append("pS");
 	}
 	@Override
 	public void unpauseAction() {
-		get(VL_FSM.class, StringBuilder.class, "data").append("uS");
+		get(FSM.class, StringBuilder.class, "data").append("uS");
 	}
 
 	@Override
 	public State<Event> defaultExit() {
-		return new VL_FSM.D(this);
+		return new FSM.D(this);
 	}
 
 	public Sub(State<Event> from, State<Event> entry) {
 		super(from, entry, Event.class);
 		TRANSITION(Event.reset, (payload -> ENTER(new Sub(this))));
-		TRANSITION(Event.error, (payload -> ENTER(new VL_FSM.E(this))));
+		TRANSITION(Event.error, (payload -> ENTER(new FSM.E(this))));
 	}
 
 	public Sub(State<Event> from) {

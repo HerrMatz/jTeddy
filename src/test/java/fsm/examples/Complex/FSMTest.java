@@ -6,11 +6,11 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.hamcrest.CoreMatchers.instanceOf;
 
-public class ComplexTest {
+public class FSMTest {
 	@Test
 	public void defaultEntryOrthogonal() {
-		Complex fsm = new Complex();
-		assertThat(fsm.getSubstates().get(0), instanceOf(Complex.Init.class));
+		FSM fsm = new FSM();
+		assertThat(fsm.getSubstates().get(0), instanceOf(FSM.Init.class));
 		fsm.handleEvent(Event.start);
 		assertThat(fsm.getSubstates().get(0), instanceOf(Active.class));
 		assertEquals(1, fsm.getSubstates().size());

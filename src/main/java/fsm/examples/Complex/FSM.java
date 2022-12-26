@@ -3,11 +3,10 @@ package fsm.examples.Complex;
 import fsm.base.State;
 import fsm.base.Superstate;
 
-public class Complex extends Superstate<Event> {
+public class FSM extends Superstate<Event> {
 
-	public Complex() {
+	public FSM() {
 		super(null, Event.class);
-		//TODO Auto-generated constructor stub
 		start(new Init(null));
 	}
 
