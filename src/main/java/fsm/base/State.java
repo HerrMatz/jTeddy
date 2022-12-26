@@ -143,6 +143,10 @@ public abstract class State<E extends Enum<E>> {
 		return parallelSubstates;
 	}
 
+	public State<E> getSubstate(int nSub) {
+		return parallelSubstates.get(nSub);
+	}
+
 	protected <T> T get(Class<? extends State<E>> clazz, Class<T> type, String field) {
 		for(State<E> state = parent; state != null; state = parent.parent) {
 			if(state.getClass().equals(clazz)) {
