@@ -9,21 +9,20 @@ public abstract class State<E extends Enum<E>> {
 	protected List<State<E>> pausedSubstates;
 	protected Set<E> events;
 	protected Map<E, Function<Integer, EventConsumption>> transitions;
-	private boolean isPaused;	// is a substate and its superstate has been exited explicitly
+	private boolean isPaused; // is a substate and its superstate has been exited explicitly
 	private boolean ranEntryAction;
 	private boolean pauseActionIsExitAction;
 	private boolean unpauseActionIsEntryAction;
 
 	public State(State<E> other, Class<E> eventType) {
-		if(other != null) {
+		if (other != null) {
 			parent = other.parent;
 			parallelSubstates = new ArrayList<>();
 			events = other.events;
 			transitions = other.transitions;
 			pausedSubstates = new ArrayList<>();
 			other.copyActionConfigTo(this);
-		}
-		else {
+		} else {
 			parent = null;
 			parallelSubstates = new ArrayList<>();
 			pausedSubstates = new ArrayList<>();
@@ -35,50 +34,56 @@ public abstract class State<E extends Enum<E>> {
 	}
 
 	private void init() {
-		for(E event : events)
+		for (E event : events)
 			transitions.put(event, (payload -> EventConsumption.unused));
 	}
 
 	/**
-	 * Hands down the event to most low level substate. Are multiple parallel substates present, only the first receives the event
+	 * Hands down the event to most low level substate. Are multiple parallel
+	 * substates present, only the first receives the event
+	 * 
 	 * @param event
 	 * @return
 	 */
 	public EventConsumption handleEvent(E event) {
 		EventConsumption ret = EventConsumption.unused;
-		for(State<E> state : parallelSubstates) {
-			if(ret != EventConsumption.fullyUsed && (state.parallelSubstates.isEmpty() || (ret = state.handleEvent(event)) != EventConsumption.fullyUsed)) {
+		for (State<E> state : parallelSubstates) {
+			if (ret == EventConsumption.fullyUsed) { // ret may be altered by recursive calls since they same the share
+														// EventConsumption instance
+				return ret;
+			}
+			if (state.parallelSubstates.isEmpty() || (ret = state.handleEvent(event)) != EventConsumption.fullyUsed) {
 				ret = state.transitions.get(event).apply(0);
-				if(ret == EventConsumption.fullyUsed) {
-					return ret;
-				}
 			}
 		}
 		return ret;
 	}
 
 	// /**
-	//  * 
-	//  * @param hierarchyLevel 0 == substates of this state
-	//  * @param nOrthogonal number of the required orthogonal (parallel) substate
-	//  * @return required substate
-	//  * @throws IndexOutOfBoundsExeption when the queried level does not have the nOrtogonal substate
-	//  */
-	// public State<E> getSubstate(int hierarchyLevel, int nOrthogonal) throws IndexOutOfBoundsException {
-	// 	for(State<E> sub : parallelSubstates) {
-	// 		return 
-	// 	}
-	// 	// if(hierarchyLevel == 0) {
-	// 	// 	return parallelSubstates.get(nOrthogonal);
-	// 	// }
-	// 	return getSubstates(hierarchyLevel).get(nOrthogonal);
+	// *
+	// * @param hierarchyLevel 0 == substates of this state
+	// * @param nOrthogonal number of the required orthogonal (parallel) substate
+	// * @return required substate
+	// * @throws IndexOutOfBoundsExeption when the queried level does not have the
+	// nOrtogonal substate
+	// */
+	// public State<E> getSubstate(int hierarchyLevel, int nOrthogonal) throws
+	// IndexOutOfBoundsException {
+	// for(State<E> sub : parallelSubstates) {
+	// return
+	// }
+	// // if(hierarchyLevel == 0) {
+	// // return parallelSubstates.get(nOrthogonal);
+	// // }
+	// return getSubstates(hierarchyLevel).get(nOrthogonal);
 	// }
 
-	// public List<State<E>> getSubstates(int hierarchyLevel) throws IndexOutOfBoundsException {
-	// 	if(hierarchyLevel == 0) {
-	// 		return parallelSubstates;
-	// 	}
-	// 	return parallelSubstates.get(0).getSubstates(hierarchyLevel - 1);
+	// public List<State<E>> getSubstates(int hierarchyLevel) throws
+	// IndexOutOfBoundsException {
+	// if(hierarchyLevel == 0) {
+	// return parallelSubstates;
+	// }
+	// return parallelSubstates.get(0).getSubstates(hierarchyLevel - 1);
 	// }
 
 	protected void TRANSITION(E event, Function<Integer, EventConsumption> func) {
@@ -87,7 +92,7 @@ public abstract class State<E extends Enum<E>> {
 
 	protected EventConsumption ENTER(State<E> newState) {
 		copyActionConfigTo(newState);
-		if(parent != null) {
+		if (parent != null) {
 			parentSwitchSubstate(this, newState, this instanceof Superstate<E>);
 		}
 		return EventConsumption.fullyUsed;
@@ -95,23 +100,22 @@ public abstract class State<E extends Enum<E>> {
 
 	protected EventConsumption ENTER_DEEP(State<E> stateWithHistory) {
 		copyActionConfigTo(stateWithHistory);
-		if(this instanceof Superstate<E>) {
+		if (this instanceof Superstate<E>) {
 			pauseSubstates();
 		}
 		State<E> historyState = null;
-		if(parent != null) {
-			for(var substate : parent.pausedSubstates) {
-				if(stateWithHistory.getClass().equals(substate.getClass())) {
+		if (parent != null) {
+			for (var substate : parent.pausedSubstates) {
+				if (stateWithHistory.getClass().equals(substate.getClass())) {
 					historyState = substate;
 					break;
 				}
 			}
 		}
-		if(historyState != null) {
+		if (historyState != null) {
 			parent.pausedSubstates.remove(historyState);
 			parentSwitchSubstate(this, historyState, this instanceof Superstate<E>);
-		}
-		else {
+		} else {
 			return ENTER(stateWithHistory);
 		}
 		return EventConsumption.fullyUsed;
@@ -136,23 +140,21 @@ public abstract class State<E extends Enum<E>> {
 	}
 
 	private void parentSwitchSubstate(State<E> from, State<E> to, boolean pauseOldState) {
-		if(parent != null) {
+		if (parent != null) {
 			var list = parent.parallelSubstates;
 			list.set(list.indexOf(from), to);
-			if(pauseOldState) {
+			if (pauseOldState) {
 				parent.pausedSubstates.add(from);
 				from.pauseSubstates();
 				from.pause();
-			}
-			else {
+			} else {
 				from.runExitActionRecurse();
 			}
 		}
-		if(to.isPaused) {
+		if (to.isPaused) {
 			to.unpause();
 			to.unpauseSubstates();
-		}
-		else {
+		} else {
 			to.runEntryActionRecurse();
 		}
 	}
@@ -180,8 +182,8 @@ public abstract class State<E extends Enum<E>> {
 	}
 
 	protected <T> T get(Class<? extends State<E>> clazz, Class<T> type, String field) {
-		for(State<E> state = parent; state != null; state = parent.parent) {
-			if(state.getClass().equals(clazz)) {
+		for (State<E> state = parent; state != null; state = parent.parent) {
+			if (state.getClass().equals(clazz)) {
 				try {
 					return type.cast(clazz.getField(field).get(state));
 				} catch (IllegalArgumentException | IllegalAccessException | NoSuchFieldException
@@ -201,7 +203,7 @@ public abstract class State<E extends Enum<E>> {
 	}
 
 	private void runExitActionRecurse() {
-		for(var substate : parallelSubstates) {
+		for (var substate : parallelSubstates) {
 			substate.runExitActionRecurse();
 		}
 		runExitAction();
@@ -213,19 +215,19 @@ public abstract class State<E extends Enum<E>> {
 
 	private void runEntryActionRecurse() {
 		runEntryAction();
-		for(var substate : parallelSubstates) {
+		for (var substate : parallelSubstates) {
 			substate.runEntryActionRecurse();
 		}
 	}
 
 	private void runEntryAction() {
-		if(!ranEntryAction)
+		if (!ranEntryAction)
 			entryAction();
 		ranEntryAction = true;
 	}
 
 	private void pause() {
-		if(pauseActionIsExitAction)
+		if (pauseActionIsExitAction)
 			exitAction();
 		else
 			pauseAction();
@@ -233,10 +235,9 @@ public abstract class State<E extends Enum<E>> {
 	}
 
 	private void unpause() {
-		if(unpauseActionIsEntryAction) {
+		if (unpauseActionIsEntryAction) {
 			entryAction();
-		}
-		else {
+		} else {
 			unpauseAction();
 		}
 		isPaused = false;
@@ -250,8 +251,15 @@ public abstract class State<E extends Enum<E>> {
 		unpauseActionIsEntryAction = b;
 	}
 
-	protected void entryAction() {}
-	protected void exitAction() {}
-	protected void pauseAction() {}
-	protected void unpauseAction() {}
+	protected void entryAction() {
+	}
+
+	protected void exitAction() {
+	}
+
+	protected void pauseAction() {
+	}
+
+	protected void unpauseAction() {
+	}
 }
