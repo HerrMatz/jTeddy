@@ -153,7 +153,7 @@ public class VL_FSM extends Superstate<Event> {
 	}
 
 	public VL_FSM() {
-		super(null, null, Event.class);
+		super(null, Event.class);
 		// setPauseActionIsExitAction(true);
 		// setUnpauseActionIsEntryAction(true);
 		start(new A(null));
