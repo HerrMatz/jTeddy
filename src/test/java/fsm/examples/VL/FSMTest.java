@@ -116,7 +116,7 @@ public class FSMTest {
 
 		fsm.handleEvent(Event.toF);
 		assertThat(fsm.getSubstate(0), instanceOf(FSM.F.class));
-		fsm.handleEvent(Event.clear);
+		fsm.handleEvent(Event.shallow);
 		assertThat(fsm.getSubstate(0), instanceOf(Sub.class));
 		assertThat(fsm.getSubstate(0).getSubstate(0), instanceOf(Sub.Low.class));
 		assertEquals(1, fsm.getSubstates().size());
@@ -125,6 +125,53 @@ public class FSMTest {
 
 	@Test
 	public void enterShallowHistoryAfterExplicitOuterExit() {
+		FSM fsm = new FSM();
+		assertThat(fsm.getSubstate(0), instanceOf(FSM.A.class));
+		fsm.handleEvent(Event.start);
+		assertThat(fsm.getSubstate(0), instanceOf(Sub.class));
+		assertThat(fsm.getSubstate(0).getSubstate(0), instanceOf(Sub.Normal.class));
+		fsm.handleEvent(Event.up);
+		assertThat(fsm.getSubstate(0), instanceOf(Sub.class));
+		assertThat(fsm.getSubstate(0).getSubstate(0), instanceOf(Sub.High.class));
+		fsm.handleEvent(Event.error);
+		assertThat(fsm.getSubstate(0), instanceOf(FSM.E.class));
+
+		fsm.handleEvent(Event.toF);
+		assertThat(fsm.getSubstate(0), instanceOf(FSM.F.class));
+		fsm.handleEvent(Event.shallow);
+		assertThat(fsm.getSubstate(0), instanceOf(Sub.class));
+		assertThat(fsm.getSubstate(0).getSubstate(0), instanceOf(Sub.High.class));
+		assertEquals(1, fsm.getSubstates().size());
+		assertEquals(1, fsm.getSubstate(0).getSubstates().size());
+	}
+
+	@Test
+	public void enterDeepHistoryAfterExplicitInnerExit() {
+		FSM fsm = new FSM();
+		assertThat(fsm.getSubstate(0), instanceOf(FSM.A.class));
+		fsm.handleEvent(Event.start);
+		assertThat(fsm.getSubstate(0), instanceOf(Sub.class));
+		assertThat(fsm.getSubstate(0).getSubstate(0), instanceOf(Sub.Normal.class));
+		fsm.handleEvent(Event.up);
+		assertThat(fsm.getSubstate(0), instanceOf(Sub.class));
+		assertThat(fsm.getSubstate(0).getSubstate(0), instanceOf(Sub.High.class));
+		fsm.handleEvent(Event.down);
+		assertThat(fsm.getSubstate(0), instanceOf(Sub.class));
+		assertThat(fsm.getSubstate(0).getSubstate(0), instanceOf(Sub.Low.class));
+		fsm.handleEvent(Event.last);
+		assertThat(fsm.getSubstate(0), instanceOf(FSM.C.class));
+
+		fsm.handleEvent(Event.toF);
+		assertThat(fsm.getSubstate(0), instanceOf(FSM.F.class));
+		fsm.handleEvent(Event.clear);
+		assertThat(fsm.getSubstate(0), instanceOf(Sub.class));
+		assertThat(fsm.getSubstate(0).getSubstate(0), instanceOf(Sub.Low.class));
+		assertEquals(1, fsm.getSubstates().size());
+		assertEquals(1, fsm.getSubstate(0).getSubstates().size());
+	}
+
+	@Test
+	public void enterDeepHistoryAfterExplicitOuterExit() {
 		FSM fsm = new FSM();
 		assertThat(fsm.getSubstate(0), instanceOf(FSM.A.class));
 		fsm.handleEvent(Event.start);

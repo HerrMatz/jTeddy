@@ -16,12 +16,12 @@ public class FSM extends Superstate<Event> {
 			TRANSITION(Event.start, (e -> ENTER(new Active(this))));
 		}
 	}
-	
+
 	public static class Inactive extends State<Event> {
 		public Inactive(State<Event> from) {
 			super(from, Event.class);
 			TRANSITION(Event.deep, (e -> ENTER_DEEP(new Active(this))));
-			// TRANSITION(Event.shallow, (e -> ENTER_SHALLOW(new Active(this))));
+			TRANSITION(Event.shallow, (e -> ENTER_SHALLOW(new Active(this))));
 		}
 	}
 	

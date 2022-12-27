@@ -149,6 +149,7 @@ public class FSM extends Superstate<Event> {
 		public F(State<Event> from) {
 			super(from, Event.class);
 			TRANSITION(Event.clear, (payload -> ENTER_DEEP(new Sub(null))));
+			TRANSITION(Event.shallow, (payload -> ENTER_SHALLOW(new Sub(null))));
 		}
 	}
 

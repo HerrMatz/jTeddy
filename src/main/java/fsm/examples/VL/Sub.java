@@ -1,5 +1,7 @@
 package fsm.examples.VL;
 
+import java.util.List;
+
 import fsm.base.State;
 import fsm.base.Superstate;
 
@@ -110,6 +112,14 @@ public class Sub extends Superstate<Event> {
 	}
 
 	public Sub(State<Event> from) {
-		this(from, new Normal(null));
+		// this(from, new Normal(null));
+		super(from, Event.class);
+		TRANSITION(Event.reset, (payload -> ENTER(new Sub(this))));
+		TRANSITION(Event.error, (payload -> ENTER(new FSM.E(this))));
 	}
+	@Override
+	protected List<State<Event>> defaultEntry() {
+		return List.of(new Normal(null));
+	}
+
 }

@@ -16,5 +16,6 @@ public enum Event {
 	down,
 	exceed,
 	error,
-	last
+	last,
+	shallow
 }
