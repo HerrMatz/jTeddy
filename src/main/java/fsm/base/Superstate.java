@@ -14,10 +14,6 @@ public class Superstate<E extends Enum<E>> extends State<E> {
 		this(from, List.of(sub), classEvent);
 	}
 
-	// public Superstate(State<E> from, Class<E> classEvent) {
-	// 	this(from, List.of(), classEvent);
-	// }
-
 	private Superstate(State<E> from, List<State<E>> orthogonalSubstates, Class<E> classEvent) {
 		super(from, classEvent);
 		for(State<E> sub : orthogonalSubstates) {

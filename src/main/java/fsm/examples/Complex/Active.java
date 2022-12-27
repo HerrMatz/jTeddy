@@ -8,7 +8,6 @@ import fsm.base.Superstate;
 public class Active extends Superstate<Event> {
 
 	public Active(State<Event> from) {
-		// super(from, List.of(new Sub1(null), new Sub2(null)), Event.class);
 		super(from, Event.class);
 		TRANSITION(Event.exit, (e -> ENTER(new FSM.Inactive(this))));
 	}
@@ -24,7 +23,6 @@ public class Active extends Superstate<Event> {
 
 	public static class Sub1 extends Superstate<Event> {
 		public Sub1(State<Event> from) {
-			// super(from, new A(null), Event.class);
 			super(from, Event.class);
 		}
 
@@ -42,7 +40,6 @@ public class Active extends Superstate<Event> {
 
 		public static class B extends Superstate<Event> {
 			public B(State<Event> from) {
-				// super(from, new B1(null), Event.class);
 				super(from, Event.class);
 			}
 
@@ -70,7 +67,6 @@ public class Active extends Superstate<Event> {
 
 	public static class Sub2 extends Superstate<Event> {
 		public Sub2(State<Event> from) {
-			// super(from, new C(null), Event.class);
 			super(from, Event.class);
 		}
 

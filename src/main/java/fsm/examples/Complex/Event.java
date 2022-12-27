@@ -6,5 +6,6 @@ public enum Event {
 	inner,
 	shallow,
 	deep,
-	advance, toD
+	advance,
+	toD
 }

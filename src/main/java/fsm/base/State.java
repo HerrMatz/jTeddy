@@ -60,33 +60,6 @@ public abstract class State<E extends Enum<E>> {
 		return ret;
 	}
 
-	// /**
-	// *
-	// * @param hierarchyLevel 0 == substates of this state
-	// * @param nOrthogonal number of the required orthogonal (parallel) substate
-	// * @return required substate
-	// * @throws IndexOutOfBoundsExeption when the queried level does not have the
-	// nOrtogonal substate
-	// */
-	// public State<E> getSubstate(int hierarchyLevel, int nOrthogonal) throws
-	// IndexOutOfBoundsException {
-	// for(State<E> sub : parallelSubstates) {
-	// return
-	// }
-	// // if(hierarchyLevel == 0) {
-	// // return parallelSubstates.get(nOrthogonal);
-	// // }
-	// return getSubstates(hierarchyLevel).get(nOrthogonal);
-	// }
-
-	// public List<State<E>> getSubstates(int hierarchyLevel) throws
-	// IndexOutOfBoundsException {
-	// if(hierarchyLevel == 0) {
-	// return parallelSubstates;
-	// }
-	// return parallelSubstates.get(0).getSubstates(hierarchyLevel - 1);
-	// }
-
 	protected void TRANSITION(E event, Function<Integer, EventConsumption> func) {
 		transitions.put(event, func);
 	}
@@ -100,14 +73,12 @@ public abstract class State<E extends Enum<E>> {
 	}
 
 	protected EventConsumption APPEND(State<E> appendState) {
-		// parallelSubstates.add(appendState);
-		// appendState.runEntryActionRecurse();
 		return APPEND(List.of(appendState));
 	}
 
 	protected EventConsumption APPEND(List<State<E>> appendStates) {
 		parallelSubstates.addAll(appendStates);
-		for(var substate : appendStates) {
+		for (var substate : appendStates) {
 			substate.parent = this;
 			copyActionConfigTo(substate);
 			substate.runEntryAction();
@@ -134,32 +105,11 @@ public abstract class State<E extends Enum<E>> {
 			parent.pausedSubstates.remove(historyState);
 			for (var substate : historyState.pausedSubstates) {
 				substate.pausedSubstates = new ArrayList<>();
-				// for(var subsubstate : substate.pausedSubstates) {
-				// subsubstate.pausedSubstates = new ArrayList<>();
-				// }
 			}
-			// if (parent != null) {
-			// 	var list = parent.parallelSubstates;
-			// 	list.set(list.indexOf(this), historyState);
-			// 	if (this instanceof Superstate<E>) {
-			// 		parent.pausedSubstates.add(this);
-			// 		pauseSubstates();
-			// 		pause();
-			// 	} else {
-			// 		runExitActionRecurse();
-			// 	}
-			// }
-			// if (historyState.isPaused) {
-			// 	historyState.unpause();
-			// 	historyState.unpauseSubstates();
-			// } else {
-			// 	historyState.runEntryActionRecurse();
-			// }
 			parentSwitchSubstate(this, historyState, this instanceof Superstate<E>);
 			for (var substate : historyState.parallelSubstates) {
 				substate.APPEND(substate.defaultEntry());
 			}
-				// parentSwitchSubstate(this, historyState, this instanceof Superstate<E>);
 		} else {
 			return ENTER(stateWithHistory);
 		}
