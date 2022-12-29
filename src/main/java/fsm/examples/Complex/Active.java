@@ -12,7 +12,7 @@ public class Active extends Superstate<Event> {
 	public Active(State<Event> from) {
 		super(from, Event.class);
 		TRANSITION(Event.exit, (e -> ENTER(new FSM.Inactive(this))));
-		TRANSITION(Event.inner, (e -> ADD(new SubN(null))));
+		TRANSITION(Event.inner, (e -> APPEND(new SubN(null))));
 	}
 
 	@Override
