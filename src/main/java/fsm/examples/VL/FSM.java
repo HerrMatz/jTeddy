@@ -6,11 +6,13 @@ import fsm.base.Superstate;
 public class FSM extends Superstate<Event> {
 
 	public StringBuilder data = new StringBuilder();
+	public StringBuilder data2 = new StringBuilder();
 
 	public static class A extends State<Event> {
 		@Override
 		public void entryAction() {
 			get(FSM.class, StringBuilder.class, "data").append("iA");
+			((FSM)parent).data2.append("iA");
 		}
 		@Override
 		public void exitAction() {

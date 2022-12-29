@@ -199,6 +199,12 @@ public class FSMTest {
 	}
 	
 	@Test
+	public void parentData() {
+		FSM fsm = new FSM();
+		assertEquals("iA", fsm.data2.toString());
+	}
+	
+	@Test
 	public void entryExitActionOrderDefaultExit() {
 		FSM fsm = new FSM();
 		assertEquals("iA", fsm.data.toString());

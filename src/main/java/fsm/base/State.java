@@ -76,13 +76,20 @@ public abstract class State<E extends Enum<E>> {
 		return APPEND(List.of(appendState));
 	}
 
+	protected EventConsumption ADD(State<E> addState) {
+		addState.parent = this;
+		addState.runEntryActionRecurse();
+		parallelSubstates.add(addState);
+		return EventConsumption.fullyUsed;
+	}
+
 	protected EventConsumption APPEND(List<State<E>> appendStates) {
 		parallelSubstates.addAll(appendStates);
 		for (var substate : appendStates) {
 			substate.parent = this;
 			copyActionConfigTo(substate);
 			substate.runEntryAction();
-			substate.APPEND(substate.defaultEntry());
+			// substate.APPEND(substate.defaultEntry());
 		}
 		return EventConsumption.fullyUsed;
 	}
