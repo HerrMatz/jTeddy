@@ -14,9 +14,9 @@ public class Superstate<E extends Enum<E>> extends State<E> {
 		this(from, List.of(sub), classEvent);
 	}
 
-	private Superstate(State<E> from, List<State<E>> orthogonalSubstates, Class<E> classEvent) {
+	private Superstate(State<E> from, List<State<E>> parallelSubs, Class<E> classEvent) {
 		super(from, classEvent);
-		for(State<E> sub : orthogonalSubstates) {
+		for(State<E> sub : parallelSubs) {
 			copyActionConfigTo(sub);
 			parallelSubstates.add(sub);
 			sub.parent = this;

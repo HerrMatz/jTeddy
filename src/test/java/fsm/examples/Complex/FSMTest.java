@@ -9,7 +9,7 @@ import static org.hamcrest.CoreMatchers.instanceOf;
 public class FSMTest {
 
 	@Test
-	public void orthogonalDefaultEntry() {
+	public void parallelDefaultEntry() {
 		FSM fsm = new FSM();
 		assertThat(fsm.getSubstate(0), instanceOf(FSM.Init.class));
 		fsm.handleEvent(Event.start);
@@ -23,7 +23,7 @@ public class FSMTest {
 	}
 
 	@Test
-	public void orthogonalDefaultExit() {
+	public void parallelDefaultExit() {
 		FSM fsm = new FSM();
 		assertThat(fsm.getSubstate(0), instanceOf(FSM.Init.class));
 		fsm.handleEvent(Event.start);
@@ -60,7 +60,7 @@ public class FSMTest {
 	}
 
 	@Test
-	public void orthogonalExplicitOuterExitDeepHistory() {
+	public void parallelExplicitOuterExitDeepHistory() {
 		FSM fsm = new FSM();
 		assertThat(fsm.getSubstate(0), instanceOf(FSM.Init.class));
 		fsm.handleEvent(Event.start);
@@ -94,7 +94,7 @@ public class FSMTest {
 	}
 
 	@Test
-	public void orthogonalExplicitOuterExitShallowHistory() {
+	public void parallelExplicitOuterExitShallowHistory() {
 		FSM fsm = new FSM();
 		assertThat(fsm.getSubstate(0), instanceOf(FSM.Init.class));
 		fsm.handleEvent(Event.start);
