@@ -50,6 +50,12 @@ public abstract class State<E extends Enum<E>> {
 	 * @return
 	 */
 	public EventConsumption handleEvent(E event) {
+		var ret = _handleEvent(event);
+		verify();
+		return ret;
+	}
+
+	public EventConsumption _handleEvent(E event) {
 		EventConsumption ret = EventConsumption.unused;
 		for (State<E> state : parallelSubstates) {
 			if (ret == EventConsumption.fullyUsed) { // ret may be altered by recursive calls since they same the share
@@ -62,6 +68,19 @@ public abstract class State<E extends Enum<E>> {
 		}
 		parallelSubstates.removeIf(state -> state == null);
 		return ret;
+	}
+
+	private void verify() throws IllegalStateException {
+		for (State<E> state : parallelSubstates) {
+			if(state.parent != this) {
+				throw new IllegalStateException("State " + state.getName() + " has parent " + state.parent.getName() + " but should have " + getName());
+			}
+			state.verify();
+		}
+	}
+
+	public String getName() {
+		return getClass().toString();
 	}
 
 	protected void TRANSITION(E event, Function<Integer, EventConsumption> func) {
@@ -170,6 +189,7 @@ public abstract class State<E extends Enum<E>> {
 				from.pause();
 			} else {
 				from.runExitActionRecurse();
+
 			}
 		}
 		if (to.isPaused) {
