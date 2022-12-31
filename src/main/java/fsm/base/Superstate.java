@@ -16,16 +16,16 @@ public class Superstate<E extends Enum<E>> extends State<E> {
 
 	private Superstate(State<E> from, List<State<E>> parallelSubs, Class<E> classEvent) {
 		super(from, classEvent);
-		for(State<E> sub : parallelSubs) {
-			copyActionConfigTo(sub);
-			parallelSubstates.add(sub);
-			sub.parent = this;
-		}
+		enterSubstates(parallelSubs);
 	}
 
 	public Superstate(State<E> from, Class<E> classEvent) {
 		super(from, classEvent);
-		for(State<E> sub : defaultEntry()) {
+		enterSubstates(defaultEntry());
+	}
+
+	private void enterSubstates(List<State<E>> parallelSubs) {
+		for(State<E> sub : parallelSubs) {
 			copyActionConfigTo(sub);
 			parallelSubstates.add(sub);
 			sub.parent = this;
