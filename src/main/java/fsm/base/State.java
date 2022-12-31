@@ -8,12 +8,18 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 
-public abstract class State<E extends Enum<E>, P> {
-	protected State<E, P> parent;
-	protected List<State<E, P>> parallelSubstates; // active substates
-	protected List<State<E, P>> pausedSubstates; // paused substates (left by explicit exit)
+/**
+ * E = Input alphabet (enum),
+ * P = Payload type (will be handed to transitions),
+ * C = Context data type
+ */
+public abstract class State<E extends Enum<E>, P, C> {
+	protected State<E, P, C> parent;
+	protected List<State<E, P, C>> parallelSubstates; // active substates
+	protected List<State<E, P, C>> pausedSubstates; // paused substates (left by explicit exit)
 	protected Set<E> events;
 	protected Map<E, Function<P, EventConsumption>> transitions;
+	protected C contextData;
 	private boolean isPaused; // is a substate and its superstate has been exited explicitly
 	private boolean pauseActionIsExitAction; // true -> on explicit exit, exit action will be called, otherwise pause
 												// action
@@ -28,7 +34,7 @@ public abstract class State<E extends Enum<E>, P> {
 	 *                   old state will remain intact.
 	 * @param eventClass Class of the event type this state handles
 	 */
-	protected State(State<E, P> from, Class<E> eventClass) {
+	protected State(State<E, P, C> from, Class<E> eventClass) {
 		this(from, eventClass, true);
 	}
 
@@ -40,7 +46,7 @@ public abstract class State<E extends Enum<E>, P> {
 	 * @param sub        Explicit entry state to enter
 	 * @param eventClass Class of the event type this state handles
 	 */
-	protected State(State<E, P> from, State<E, P> sub, Class<E> eventClass) {
+	protected State(State<E, P, C> from, State<E, P, C> sub, Class<E> eventClass) {
 		this(from, eventClass, false);
 		enterSubstates(List.of(sub));
 	}
@@ -53,7 +59,7 @@ public abstract class State<E extends Enum<E>, P> {
 	 * @param eventClass       Class of the event type this state handles
 	 * @param makeDefaultEntry
 	 */
-	private State(State<E, P> other, Class<E> eventType, boolean makeDefaultEntry) {
+	private State(State<E, P, C> other, Class<E> eventType, boolean makeDefaultEntry) {
 		// copy relevant data from state
 		if (other != null) {
 			parent = other.parent;
@@ -61,7 +67,7 @@ public abstract class State<E extends Enum<E>, P> {
 			events = other.events;
 			transitions = other.transitions;
 			pausedSubstates = new ArrayList<>();
-			other.copyActionConfigTo(this);
+			other.copyRelevantDataTo(this);
 		}
 		// no state to take over from
 		else {
@@ -84,41 +90,6 @@ public abstract class State<E extends Enum<E>, P> {
 	}
 
 	/**
-	 * Appends parallelSubs to this states active substates. Does not run entry
-	 * Action
-	 * 
-	 * @param parallelSubs parallel substates to add to this state
-	 */
-	private void enterSubstates(List<? extends State<E, P>> parallelSubs) {
-		for (State<E, P> sub : parallelSubs) {
-			copyActionConfigTo(sub);
-			parallelSubstates.add(sub);
-			sub.parent = this;
-		}
-	}
-
-	/**
-	 * For use in topmost superstate ("context") constructor only. Starts this state
-	 * machine by calling initState's entry action
-	 * 
-	 * @param initState Initial state of the state machine
-	 */
-	protected void start(State<E, P> initState) {
-		copyActionConfigTo(initState);
-		parallelSubstates.add(initState);
-		initState.parent = this;
-		initState.entryAction();
-	}
-
-	/**
-	 * @return true if this is a superstate, otherwise false. A state is a
-	 *         superstate if it has one or more default entry states
-	 */
-	private boolean isSuperstate() {
-		return !defaultEntry().isEmpty();
-	}
-
-	/**
 	 * Hands down the event to most low level substate. Are multiple parallel
 	 * substates present, only the first receives the event. If the substate does
 	 * not use the event fully (returns EventConsumption.fullyUsed), it is handed to
@@ -137,6 +108,263 @@ public abstract class State<E extends Enum<E>, P> {
 	}
 
 	/**
+	 * Returns the name of the dynamic type
+	 * 
+	 * @see java.lang.Object#toString()
+	 */
+	public String toString() {
+		return getClass().toString();
+	}
+
+	/**
+	 * @return A list of all parallel substates
+	 */
+	public List<State<E, P, C>> getSubstates() {
+		return parallelSubstates;
+	}
+
+	/**
+	 * Use 0 for regular states
+	 * 
+	 * @param nSub Index of requested parallel substate
+	 * @return Requested substate
+	 */
+	public State<E, P, C> getSubstate(int nSub) {
+		return parallelSubstates.get(nSub);
+	}
+
+	/**
+	 * For use in topmost superstate ("context") constructor only. Starts this state
+	 * machine by calling initState's entry action
+	 * 
+	 * @param initState Initial state of the state machine
+	 */
+	protected void start(State<E, P, C> initState) {
+		copyRelevantDataTo(initState);
+		parallelSubstates.add(initState);
+		initState.parent = this;
+		initState.entryAction();
+	}
+
+	/**
+	 * Adds a transition to the current state.
+	 * 
+	 * @param event Event that triggers the transition
+	 * @param func  Callback that will be called upon event arrival
+	 */
+	protected void TRANSITION(E event, Function<P, EventConsumption> func) {
+		transitions.put(event, func);
+	}
+
+	/**
+	 * For a regular state change (state to state, state to superstate with default
+	 * entry, superstate to state with default exit, superstate to superstate with
+	 * both default exit and entry)
+	 * 
+	 * @param newState State that will replace this one
+	 * @return EventConsumption.fullyUsed for ease of use in lambdas
+	 */
+	protected EventConsumption ENTER(State<E, P, C> newState) {
+		copyRelevantDataTo(newState);
+		if (parent != null) {
+			parentSwitchSubstate(this, newState, isSuperstate());
+		}
+		return EventConsumption.fullyUsed;
+	}
+
+	/**
+	 * Appends the given state to this states parallel substates and calls its entry
+	 * action. For dynamically adding more paralles superstates. Not defined in UML.
+	 * 
+	 * @param appendState State to be appended
+	 * @return EventConsumption.fullyUsed for ease of use in lambdas
+	 */
+	protected EventConsumption APPEND(State<E, P, C> appendState) {
+		return APPEND(List.of(appendState));
+	}
+
+	/**
+	 * Enters a superstate's shallow history if present, otherwise uses its default
+	 * entry.
+	 * For superstates that only contain one sub-fsm, the sub-fsm's top level state
+	 * default entry will be performed.
+	 * For superstates that contain multiple parallel superstates, each superstate's
+	 * default entry will be performed.
+	 * Thusly, the parallel substates' old state configuration will not be retained.
+	 * Calls entry- or unpause action of reactivated states according to
+	 * configuration.
+	 * Calls entry action of possible deeper default entry states.
+	 * States that are discarded because they are too deep in the history will not
+	 * have their exit action performed.
+	 * 
+	 * @param stateWithHistory State whose shallow history to enter
+	 * @return EventConsumption.fullyUsed for ease of use in lambdas
+	 */
+	protected EventConsumption ENTER_SHALLOW(State<E, P, C> stateWithHistory) {
+		return enterHistory(stateWithHistory, true);
+	}
+
+	/**
+	 * Enters a superstate's deep history if present, otherwise uses its default
+	 * entry.
+	 * The entire superstate's old configuration will be reactivated.
+	 * Calls entry- or unpause action of reactivated states according to
+	 * configuration.
+	 * 
+	 * @param stateWithHistory State whose deep history to enter
+	 * @return EventConsumption.fullyUsed for ease of use in lambdas
+	 */
+	protected EventConsumption ENTER_DEEP(State<E, P, C> stateWithHistory) {
+		return enterHistory(stateWithHistory, false);
+	}
+
+	/**
+	 * Terminates this sub-fsm. Used if a transition would lead to an end state.
+	 * Calls all respective exit actions.
+	 * 
+	 * @return EventConsumption.fullyUsed for ease of use in lambdas
+	 */
+	protected EventConsumption EXIT() {
+		var exitTo = parent.defaultExit();
+		// parent has no default exit because it is running in parallel
+		if (exitTo == null) {
+			return parent.EXIT();
+		}
+		// there are still other substates active, don't use default exit
+		else if (parent.parallelSubstates.size() > 1) {
+			var subs = parent.parallelSubstates;
+			subs.set(subs.indexOf(this), null);
+			runExitActionRecurse();
+			return EventConsumption.fullyUsed;
+		}
+		return EXIT(exitTo, true);
+	}
+
+	/**
+	 * Exits the current superstate to the given explicitExitState
+	 * 
+	 * @param explicitExitState State to enter explicitly
+	 * @return EventConsumption.fullyUsed for ease of use in lambdas
+	 */
+	protected EventConsumption EXIT(State<E, P, C> explicitExitState) {
+		return EXIT(explicitExitState, false);
+	}
+
+	/**
+	 * Must be overridden in each superstate. Must be overridden only in
+	 * superstates.
+	 * Presence of default entry state(s) is the criteria for being a considered a
+	 * superstate
+	 * 
+	 * @return List of states that are entered on this states default entry
+	 */
+	protected List<? extends State<E, P, C>> defaultEntry() {
+		return List.of();
+	}
+
+	/**
+	 * Should be overridden in each superstate. Should be overridden only in
+	 * superstates.
+	 * 
+	 * @return This state's default exit state
+	 */
+	protected State<E, P, C> defaultExit() {
+		return null;
+	}
+
+	/**
+	 * Access a parent state's member by reflection. Works on all ancestors as they
+	 * are identified by the states class.
+	 * Rather hacky, should be avoided.
+	 * 
+	 * @param <T>   Type of the requested member
+	 * @param clazz Class of the respective state
+	 * @param type  Class of the requested member
+	 * @param field Name of the requested member in the given class
+	 * @return Reference to the requested member
+	 */
+	protected <T> T get(Class<? extends State<E, P, C>> clazz, Class<T> type, String field) {
+		for (State<E, P, C> state = parent; state != null; state = parent.parent) {
+			if (state.getClass().equals(clazz)) {
+				try {
+					return type.cast(clazz.getField(field).get(state));
+				} catch (IllegalArgumentException | IllegalAccessException | NoSuchFieldException
+						| SecurityException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Set if on pausing states pause- or exit action will be called
+	 * 
+	 * @param b true -> call exit action on pause, otherwise call pause action on
+	 *          pause
+	 */
+	protected void setPauseActionIsExitAction(boolean b) {
+		pauseActionIsExitAction = b;
+	}
+
+	/**
+	 * Set if on unpausing states unpause- or entry action will be called
+	 * 
+	 * @param b true -> call entry action on unpause, otherwise call unpause action
+	 *          on unpause
+	 */
+	protected void setUnpauseActionIsEntryAction(boolean b) {
+		unpauseActionIsEntryAction = b;
+	}
+
+	/**
+	 * Will be called when this state is entered
+	 */
+	protected void entryAction() {
+	}
+
+	/**
+	 * Will be called when this state is exited
+	 */
+	protected void exitAction() {
+	}
+
+	/**
+	 * Will be called when this state is paused (left by explicit exit)
+	 */
+	protected void pauseAction() {
+	}
+
+	/**
+	 * Will be called when this state is unpaused (entered by deep or shallow
+	 * history)
+	 */
+	protected void unpauseAction() {
+	}
+
+	/**
+	 * Appends parallelSubs to this states active substates. Does not run entry
+	 * Action
+	 * 
+	 * @param parallelSubs parallel substates to add to this state
+	 */
+	private void enterSubstates(List<? extends State<E, P, C>> parallelSubs) {
+		for (State<E, P, C> sub : parallelSubs) {
+			copyRelevantDataTo(sub);
+			parallelSubstates.add(sub);
+			sub.parent = this;
+		}
+	}
+
+	/**
+	 * @return true if this is a superstate, otherwise false. A state is a
+	 *         superstate if it has one or more default entry states
+	 */
+	private boolean isSuperstate() {
+		return !defaultEntry().isEmpty();
+	}
+
+	/**
 	 * Recursive helper function for handleEvent to prevent redundant verification
 	 * 
 	 * @param event
@@ -144,7 +372,7 @@ public abstract class State<E extends Enum<E>, P> {
 	 */
 	private EventConsumption _handleEvent(BaseEvent<E, P> event) {
 		EventConsumption ret = EventConsumption.unused;
-		for (State<E, P> state : parallelSubstates) {
+		for (State<E, P, C> state : parallelSubstates) {
 			// ret may be altered by recursive calls since they same the share
 			// EventConsumption instance
 			if (ret == EventConsumption.fullyUsed) {
@@ -167,7 +395,7 @@ public abstract class State<E extends Enum<E>, P> {
 	 * @throws IllegalStateException if a parent is set incorrectly
 	 */
 	private void verify() throws IllegalStateException {
-		for (State<E, P> state : parallelSubstates) {
+		for (State<E, P, C> state : parallelSubstates) {
 			if (state.parent != this) {
 				throw new IllegalStateException("State " + state + " has parent " + state.parent
 						+ " but should have " + this);
@@ -176,95 +404,14 @@ public abstract class State<E extends Enum<E>, P> {
 		}
 	}
 
-	/**
-	 * Returns the name of the dynamic type
-	 * 
-	 * @see java.lang.Object#toString()
-	 */
-	public String toString() {
-		return getClass().toString();
-	}
-
-	/**
-	 * Adds a transition to the current state.
-	 * 
-	 * @param event Event that triggers the transition
-	 * @param func  Callback that will be called upon event arrival
-	 */
-	protected void TRANSITION(E event, Function<P, EventConsumption> func) {
-		transitions.put(event, func);
-	}
-
-	/**
-	 * For a regular state change (state to state, state to superstate with default
-	 * entry, superstate to state with default exit, superstate to superstate with
-	 * both default exit and entry)
-	 * 
-	 * @param newState State that will replace this one
-	 * @return EventConsumption.fullyUsed for ease of use in lambdas
-	 */
-	protected EventConsumption ENTER(State<E, P> newState) {
-		copyActionConfigTo(newState);
-		if (parent != null) {
-			parentSwitchSubstate(this, newState, isSuperstate());
-		}
-		return EventConsumption.fullyUsed;
-	}
-
-	/**
-	 * Appends the given state to this states parallel substates and calls its entry
-	 * action. For dynamically adding more paralles superstates. Not defined in UML.
-	 * 
-	 * @param appendState State to be appended
-	 * @return EventConsumption.fullyUsed for ease of use in lambdas
-	 */
-	protected EventConsumption APPEND(State<E, P> appendState) {
-		return APPEND(List.of(appendState));
-	}
-
-	private EventConsumption APPEND(List<? extends State<E, P>> appendStates) {
+	private EventConsumption APPEND(List<? extends State<E, P, C>> appendStates) {
 		parallelSubstates.addAll(appendStates);
 		for (var substate : appendStates) {
 			substate.parent = this;
-			copyActionConfigTo(substate);
+			copyRelevantDataTo(substate);
 			substate.runEntryActionRecurse();
 		}
 		return EventConsumption.fullyUsed;
-	}
-
-	/**
-	 * Enters a superstate's shallow history if present, otherwise uses its default
-	 * entry.
-	 * For superstates that only contain one sub-fsm, the sub-fsm's top level state
-	 * default entry will be performed.
-	 * For superstates that contain multiple parallel superstates, each superstate's
-	 * default entry will be performed.
-	 * Thusly, the parallel substates' old state configuration will not be retained.
-	 * Calls entry- or unpause action of reactivated states according to
-	 * configuration.
-	 * Calls entry action of possible deeper default entry states.
-	 * States that are discarded because they are too deep in the history will not
-	 * have their exit action performed.
-	 * 
-	 * @param stateWithHistory State whose shallow history to enter
-	 * @return EventConsumption.fullyUsed for ease of use in lambdas
-	 */
-	protected EventConsumption ENTER_SHALLOW(State<E, P> stateWithHistory) {
-		return enterHistory(stateWithHistory, true);
-	}
-
-	/**
-	 * Enters a superstate's deep history if present, otherwise uses its default
-	 * entry.
-	 * The entire superstate's old configuration will be reactivated.
-	 * Calls entry- or unpause action of reactivated states according to
-	 * configuration.
-	 * 
-	 * @param stateWithHistory State whose deep history to enter
-	 * @return EventConsumption.fullyUsed for ease of use in lambdas
-	 */
-	protected EventConsumption ENTER_DEEP(State<E, P> stateWithHistory) {
-		return enterHistory(stateWithHistory, false);
 	}
 
 	/**
@@ -275,10 +422,10 @@ public abstract class State<E extends Enum<E>, P> {
 	 *                         history
 	 * @return EventConsumption.fullyUsed for ease of use in lambdas
 	 */
-	private EventConsumption enterHistory(State<E, P> stateWithHistory, boolean shallow) {
-		copyActionConfigTo(stateWithHistory);
+	private EventConsumption enterHistory(State<E, P, C> stateWithHistory, boolean shallow) {
+		copyRelevantDataTo(stateWithHistory);
 		pauseSubstates();
-		State<E, P> historyState = null;
+		State<E, P, C> historyState = null;
 		// Check if there is a history present for the requested state
 		if (parent != null) {
 			for (var substate : parent.pausedSubstates) {
@@ -313,64 +460,10 @@ public abstract class State<E extends Enum<E>, P> {
 		return EventConsumption.fullyUsed;
 	}
 
-	/**
-	 * Terminates this sub-fsm. Used if a transition would lead to an end state.
-	 * Calls all respective exit actions.
-	 * 
-	 * @return EventConsumption.fullyUsed for ease of use in lambdas
-	 */
-	protected EventConsumption EXIT() {
-		var exitTo = parent.defaultExit();
-		// parent has no default exit because it is running in parallel
-		if (exitTo == null) {
-			return parent.EXIT();
-		}
-		// there are still other substates active, don't use default exit
-		else if (parent.parallelSubstates.size() > 1) {
-			var subs = parent.parallelSubstates;
-			subs.set(subs.indexOf(this), null);
-			runExitActionRecurse();
-			return EventConsumption.fullyUsed;
-		}
-		return EXIT(exitTo, true);
-	}
-
-	/**
-	 * Exits the current superstate to the given explicitExitState
-	 * 
-	 * @param explicitExitState State to enter explicitly
-	 * @return EventConsumption.fullyUsed for ease of use in lambdas
-	 */
-	protected EventConsumption EXIT(State<E, P> explicitExitState) {
-		return EXIT(explicitExitState, false);
-	}
-
-	private EventConsumption EXIT(State<E, P> explicitExitState, boolean execExitAction) {
-		copyActionConfigTo(explicitExitState);
+	private EventConsumption EXIT(State<E, P, C> explicitExitState, boolean execExitAction) {
+		copyRelevantDataTo(explicitExitState);
 		parent.parentSwitchSubstate(parent, explicitExitState, !execExitAction);
 		return EventConsumption.fullyUsed;
-	}
-
-	/**
-	 * Must be overridden in each superstate. Must be overridden only in
-	 * superstates.
-	 * Presence of default entry state(s) is the criteria for being a considered a
-	 * superstate
-	 * 
-	 * @return List of states that are entered on this states default entry
-	 */
-	protected List<? extends State<E, P>> defaultEntry() {
-		return List.of();
-	}
-
-	/**
-	 * Should be overridden in each superstate. Should be overridden only in
-	 * superstates.
-	 * 
-	 * @return This state's default exit state
-	 */
-	protected State<E, P> defaultExit() {
-		return null;
 	}
 
 	/**
@@ -381,7 +474,7 @@ public abstract class State<E extends Enum<E>, P> {
 	 * @param pauseOldState true -> run pause action and add to paused substates,
 	 *                      otherwise run exit action
 	 */
-	private void parentSwitchSubstate(State<E, P> from, State<E, P> to, boolean pauseOldState) {
+	private void parentSwitchSubstate(State<E, P, C> from, State<E, P, C> to, boolean pauseOldState) {
 		if (parent != null) {
 			var subs = parent.parallelSubstates;
 			subs.set(subs.indexOf(from), to);
@@ -422,56 +515,15 @@ public abstract class State<E extends Enum<E>, P> {
 	}
 
 	/**
-	 * @return A list of all parallel substates
-	 */
-	public List<State<E, P>> getSubstates() {
-		return parallelSubstates;
-	}
-
-	/**
-	 * Use 0 for regular states
-	 * 
-	 * @param nSub Index of requested parallel substate
-	 * @return Requested substate
-	 */
-	public State<E, P> getSubstate(int nSub) {
-		return parallelSubstates.get(nSub);
-	}
-
-	/**
-	 * Access a parent state's member by reflection. Works on all ancestors as they
-	 * are identified by the states class.
-	 * Rather hacky, should be avoided.
-	 * 
-	 * @param <T>   Type of the requested member
-	 * @param clazz Class of the respective state
-	 * @param type  Class of the requested member
-	 * @param field Name of the requested member in the given class
-	 * @return Reference to the requested member
-	 */
-	protected <T> T get(Class<? extends State<E, P>> clazz, Class<T> type, String field) {
-		for (State<E, P> state = parent; state != null; state = parent.parent) {
-			if (state.getClass().equals(clazz)) {
-				try {
-					return type.cast(clazz.getField(field).get(state));
-				} catch (IllegalArgumentException | IllegalAccessException | NoSuchFieldException
-						| SecurityException e) {
-					e.printStackTrace();
-				}
-			}
-		}
-		return null;
-	}
-
-	/**
 	 * Copies data to other state
 	 * 
 	 * @param other state to copy data to
 	 */
-	private void copyActionConfigTo(State<E, P> other) {
+	private void copyRelevantDataTo(State<E, P, C> other) {
 		if (other != null) {
 			other.setPauseActionIsExitAction(pauseActionIsExitAction);
 			other.setUnpauseActionIsEntryAction(unpauseActionIsEntryAction);
+			other.contextData = contextData;
 		}
 	}
 
@@ -519,50 +571,5 @@ public abstract class State<E extends Enum<E>, P> {
 			unpauseAction();
 		}
 		isPaused = false;
-	}
-
-	/**
-	 * Set if on pausing states pause- or exit action will be called
-	 * 
-	 * @param b true -> call exit action on pause, otherwise call pause action on
-	 *          pause
-	 */
-	protected void setPauseActionIsExitAction(boolean b) {
-		pauseActionIsExitAction = b;
-	}
-
-	/**
-	 * Set if on unpausing states unpause- or entry action will be called
-	 * 
-	 * @param b true -> call entry action on unpause, otherwise call unpause action
-	 *          on unpause
-	 */
-	protected void setUnpauseActionIsEntryAction(boolean b) {
-		unpauseActionIsEntryAction = b;
-	}
-
-	/**
-	 * Will be called when this state is entered
-	 */
-	protected void entryAction() {
-	}
-
-	/**
-	 * Will be called when this state is exited
-	 */
-	protected void exitAction() {
-	}
-
-	/**
-	 * Will be called when this state is paused (left by explicit exit)
-	 */
-	protected void pauseAction() {
-	}
-
-	/**
-	 * Will be called when this state is unpaused (entered by deep or shallow
-	 * history)
-	 */
-	protected void unpauseAction() {
 	}
 }
