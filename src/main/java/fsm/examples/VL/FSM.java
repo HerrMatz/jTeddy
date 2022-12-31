@@ -27,7 +27,7 @@ public class FSM extends MyState {
 		public A(MyState from) {
 			super(from);
 			TRANSITION(Event.start, (payload -> ENTER(new Sub(this))));
-			TRANSITION(Event.bypass, (payload -> ENTER(new B(this))));
+			TRANSITION(Event.toB, (payload -> ENTER(new B(this))));
 		}
 	}
 
@@ -75,7 +75,7 @@ public class FSM extends MyState {
 
 		public C(MyState from) {
 			super(from);
-			TRANSITION(Event.bypass, (payload -> ENTER(new D(this))));
+			TRANSITION(Event.toD, (payload -> ENTER(new D(this))));
 			TRANSITION(Event.toF, (payload -> ENTER(new F(this))));
 		}
 	}
@@ -147,7 +147,7 @@ public class FSM extends MyState {
 
 		public F(MyState from) {
 			super(from);
-			TRANSITION(Event.clear, (payload -> ENTER_DEEP(new Sub(null))));
+			TRANSITION(Event.deep, (payload -> ENTER_DEEP(new Sub(null))));
 			TRANSITION(Event.shallow, (payload -> ENTER_SHALLOW(new Sub(null))));
 		}
 	}

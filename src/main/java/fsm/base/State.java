@@ -35,7 +35,8 @@ public abstract class State<E extends Enum<E>, P, C> {
 	 * @param eventClass Class of the event type this state handles
 	 */
 	protected State(State<E, P, C> from, Class<E> eventClass) {
-		this(from, eventClass, true);
+		// this(from, eventClass, true);
+		this(from, null, eventClass);
 	}
 
 	/**
@@ -47,8 +48,10 @@ public abstract class State<E extends Enum<E>, P, C> {
 	 * @param eventClass Class of the event type this state handles
 	 */
 	protected State(State<E, P, C> from, State<E, P, C> sub, Class<E> eventClass) {
-		this(from, eventClass, false);
-		enterSubstates(List.of(sub));
+		this(from, eventClass, sub == null);
+		if(sub != null) {
+			enterSubstates(List.of(sub));
+		}
 	}
 
 	/**
@@ -105,6 +108,9 @@ public abstract class State<E extends Enum<E>, P, C> {
 		var ret = _handleEvent(event);
 		verify();
 		return ret;
+	}
+	public EventConsumption handleEvent(E event) {
+		return handleEvent(new BaseEvent<E, P>(event, null));
 	}
 
 	/**

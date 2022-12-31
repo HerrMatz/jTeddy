@@ -8,7 +8,7 @@ public enum Event {
 	toE,
 	toF,
 	start,
-	bypass,
+	// bypass,
 	reset,
 	up,
 	tick,
@@ -17,5 +17,6 @@ public enum Event {
 	exceed,
 	error,
 	last,
+	deep,
 	shallow
 }

@@ -106,13 +106,11 @@ public class Sub extends MyState {
 		super(from, entry);
 		TRANSITION(Event.reset, (payload -> ENTER(new Sub(this))));
 		TRANSITION(Event.error, (payload -> ENTER(new FSM.E(this))));
+		TRANSITION(Event.tick, (payload -> ENTER_DEEP(new Sub(this))));
 	}
 
 	public Sub(MyState from) {
-		// this(from, new Normal(null));
-		super(from);
-		TRANSITION(Event.reset, (payload -> ENTER(new Sub(this))));
-		TRANSITION(Event.error, (payload -> ENTER(new FSM.E(this))));
+		this(from, null);
 	}
 	@Override
 	protected List<MyState> defaultEntry() {
