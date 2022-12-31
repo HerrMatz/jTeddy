@@ -6,12 +6,12 @@ public class Superstate<E extends Enum<E>> extends State<E> {
 	
 	/**
 	 * Use for explicit entry
-	 * @param from
-	 * @param sub
-	 * @param classEvent
+	 * @param from Original state that this new state replaces
+	 * @param sub Explicit entry state to enter
+	 * @param eventClass Class of the event type this state handles
 	 */
-	public Superstate(State<E> from, State<E> sub, Class<E> classEvent) {
-		this(from, List.of(sub), classEvent);
+	public Superstate(State<E> from, State<E> sub, Class<E> eventClass) {
+		this(from, List.of(sub), eventClass);
 	}
 
 	private Superstate(State<E> from, List<State<E>> parallelSubs, Class<E> classEvent) {

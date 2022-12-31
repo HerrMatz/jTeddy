@@ -229,7 +229,6 @@ public abstract class State<E extends Enum<E>> {
 					return type.cast(clazz.getField(field).get(state));
 				} catch (IllegalArgumentException | IllegalAccessException | NoSuchFieldException
 						| SecurityException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
