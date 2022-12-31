@@ -1,25 +1,22 @@
 package fsm.examples.Complex2;
 
-import fsm.base.State;
-import fsm.base.Superstate;
-
-public class FSM extends Superstate<Event> {
+public class FSM extends MyState{
 
 	public FSM() {
-		super(null, Event.class);
+		super(null);
 		start(new Init(null));
 	}
 
-	public static class Init extends State<Event> {
-		public Init(State<Event> from) {
-			super(from, Event.class);
+	public static class Init extends MyState {
+		public Init(MyState from) {
+			super(from);
 			TRANSITION(Event.start, (e -> ENTER(new Active(this))));
 		}
 	}
 
-	public static class Inactive extends State<Event> {
-		public Inactive(State<Event> from) {
-			super(from, Event.class);
+	public static class Inactive extends MyState {
+		public Inactive(MyState from) {
+			super(from);
 			TRANSITION(Event.deep, (e -> ENTER_DEEP(new Active(this))));
 			TRANSITION(Event.shallow, (e -> ENTER_SHALLOW(new Active(this))));
 		}

@@ -1,14 +1,11 @@
 package fsm.examples.VL;
 
-import fsm.base.State;
-import fsm.base.Superstate;
-
-public class FSM extends Superstate<Event> {
+public class FSM extends MyState {
 
 	public StringBuilder data = new StringBuilder();
 	public StringBuilder data2 = new StringBuilder();
 
-	public static class A extends State<Event> {
+	public static class A extends MyState {
 		@Override
 		public void entryAction() {
 			get(FSM.class, StringBuilder.class, "data").append("iA");
@@ -27,14 +24,14 @@ public class FSM extends Superstate<Event> {
 			get(FSM.class, StringBuilder.class, "data").append("uA");
 		}
 
-		public A(State<Event> from) {
-			super(from, Event.class);
+		public A(MyState from) {
+			super(from);
 			TRANSITION(Event.start, (payload -> ENTER(new Sub(this))));
 			TRANSITION(Event.bypass, (payload -> ENTER(new B(this))));
 		}
 	}
 
-	public static class B extends State<Event> {
+	public static class B extends MyState {
 		@Override
 		public void entryAction() {
 			get(FSM.class, StringBuilder.class, "data").append("iB");
@@ -52,13 +49,13 @@ public class FSM extends Superstate<Event> {
 			get(FSM.class, StringBuilder.class, "data").append("uB");
 		}
 
-		public B(State<Event> from) {
-			super(from, Event.class);
+		public B(MyState from) {
+			super(from);
 			TRANSITION(Event.up, (payload -> ENTER(new Sub(this, new Sub.High(null)))));
 		}
 	}
 
-	public static class C extends State<Event> {
+	public static class C extends MyState {
 		@Override
 		public void entryAction() {
 			get(FSM.class, StringBuilder.class, "data").append("iC");
@@ -76,14 +73,14 @@ public class FSM extends Superstate<Event> {
 			get(FSM.class, StringBuilder.class, "data").append("uC");
 		}
 
-		public C(State<Event> from) {
-			super(from, Event.class);
+		public C(MyState from) {
+			super(from);
 			TRANSITION(Event.bypass, (payload -> ENTER(new D(this))));
 			TRANSITION(Event.toF, (payload -> ENTER(new F(this))));
 		}
 	}
 
-	public static class D extends State<Event> {
+	public static class D extends MyState {
 		@Override
 		public void entryAction() {
 			get(FSM.class, StringBuilder.class, "data").append("iD");
@@ -101,12 +98,12 @@ public class FSM extends Superstate<Event> {
 			get(FSM.class, StringBuilder.class, "data").append("uD");
 		}
 
-		public D(State<Event> from) {
-			super(from, Event.class);
+		public D(MyState from) {
+			super(from);
 		}
 	}
 
-	public static class E extends State<Event> {
+	public static class E extends MyState {
 		@Override
 		public void entryAction() {
 			get(FSM.class, StringBuilder.class, "data").append("iE");
@@ -124,13 +121,13 @@ public class FSM extends Superstate<Event> {
 			get(FSM.class, StringBuilder.class, "data").append("uE");
 		}
 
-		public E(State<Event> from) {
-			super(from, Event.class);
+		public E(MyState from) {
+			super(from);
 			TRANSITION(Event.toF, (payload -> ENTER(new F(this))));
 		}
 	}
 
-	public static class F extends State<Event> {
+	public static class F extends MyState {
 		@Override
 		public void entryAction() {
 			get(FSM.class, StringBuilder.class, "data").append("iF");
@@ -148,15 +145,15 @@ public class FSM extends Superstate<Event> {
 			get(FSM.class, StringBuilder.class, "data").append("uF");
 		}
 
-		public F(State<Event> from) {
-			super(from, Event.class);
+		public F(MyState from) {
+			super(from);
 			TRANSITION(Event.clear, (payload -> ENTER_DEEP(new Sub(null))));
 			TRANSITION(Event.shallow, (payload -> ENTER_SHALLOW(new Sub(null))));
 		}
 	}
 
 	public FSM() {
-		super(null, Event.class);
+		super(null);
 		// setPauseActionIsExitAction(true);
 		// setUnpauseActionIsEntryAction(true);
 		start(new A(null));

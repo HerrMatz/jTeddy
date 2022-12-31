@@ -1,42 +1,42 @@
-package fsm.base;
+// package fsm.base;
 
-import java.util.List;
+// import java.util.List;
 
-public class Superstate<E extends Enum<E>> extends State<E> {
+// public class Superstate<E extends Enum<E>, P> extends State<E, P> {
 	
-	/**
-	 * Use for explicit entry
-	 * @param from Original state that this new state replaces
-	 * @param sub Explicit entry state to enter
-	 * @param eventClass Class of the event type this state handles
-	 */
-	public Superstate(State<E> from, State<E> sub, Class<E> eventClass) {
-		this(from, List.of(sub), eventClass);
-	}
+// 	/**
+// 	 * Use for explicit entry
+// 	 * @param from Original state that this new state replaces
+// 	 * @param sub Explicit entry state to enter
+// 	 * @param eventClass Class of the event type this state handles
+// 	 */
+// 	public Superstate(State<E, P> from, State<E, P> sub, Class<E> eventClass) {
+// 		this(from, List.of(sub), eventClass);
+// 	}
 
-	private Superstate(State<E> from, List<State<E>> parallelSubs, Class<E> classEvent) {
-		super(from, classEvent);
-		enterSubstates(parallelSubs);
-	}
+// 	private Superstate(State<E, P> from, List<State<E, P>> parallelSubs, Class<E> classEvent) {
+// 		super(from, classEvent);
+// 		enterSubstates(parallelSubs);
+// 	}
 
-	public Superstate(State<E> from, Class<E> classEvent) {
-		super(from, classEvent);
-		enterSubstates(defaultEntry());
-	}
+// 	public Superstate(State<E, P> from, Class<E> classEvent) {
+// 		super(from, classEvent);
+// 		enterSubstates(defaultEntry());
+// 	}
 
-	private void enterSubstates(List<State<E>> parallelSubs) {
-		for(State<E> sub : parallelSubs) {
-			copyActionConfigTo(sub);
-			parallelSubstates.add(sub);
-			sub.parent = this;
-		}
-	}
+// 	private void enterSubstates(List<State<E, P>> parallelSubs) {
+// 		for(State<E, P> sub : parallelSubs) {
+// 			copyActionConfigTo(sub);
+// 			parallelSubstates.add(sub);
+// 			sub.parent = this;
+// 		}
+// 	}
 
-	public void start(State<E> s) {
-		copyActionConfigTo(s);
-		parallelSubstates.add(s);
-		s.parent = this;
-		s.entryAction();
-	}
+// 	public void start(State<E, P> s) {
+// 		copyActionConfigTo(s);
+// 		parallelSubstates.add(s);
+// 		s.parent = this;
+// 		s.entryAction();
+// 	}
 
-}
+// }

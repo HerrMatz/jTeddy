@@ -2,65 +2,63 @@ package fsm.examples.Complex;
 
 import java.util.List;
 
-import fsm.base.State;
-import fsm.base.Superstate;
-
-public class Active extends Superstate<Event> {
+public class Active extends MyState {
 
 	public StringBuilder data = new StringBuilder();
 
-	public Active(State<Event> from) {
-		super(from, Event.class);
+	public Active(MyState from) {
+		super(from);
 		TRANSITION(Event.exit, (e -> ENTER(new FSM.Inactive(this))));
 		TRANSITION(Event.inner, (e -> APPEND(new SubN(null))));
 	}
 
 	@Override
-	protected State<Event> defaultExit() {
+	protected MyState defaultExit() {
 		return new FSM.Inactive(this);
 	}
+
 	@Override
-	protected List<State<Event>> defaultEntry() {
+	protected List<MyState> defaultEntry() {
 		return List.of(new Sub1(null), new Sub2(null));
 	}
 
-	public static class Sub1 extends Superstate<Event> {
-		public Sub1(State<Event> from) {
-			super(from, Event.class);
+	public static class Sub1 extends MyState {
+		public Sub1(MyState from) {
+			super(from);
 		}
 
 		@Override
-		protected List<State<Event>> defaultEntry() {
+		protected List<MyState> defaultEntry() {
 			return List.of(new A(null));
 		}
 
-		public static class A extends State<Event> {
-			public A(State<Event> from) {
-				super(from, Event.class);
+		public static class A extends MyState {
+			public A(MyState from) {
+				super(from);
 				TRANSITION(Event.advance, (e -> ENTER(new B(this))));
 			}
 		}
 
-		public static class B extends Superstate<Event> {
-			public B(State<Event> from) {
-				super(from, Event.class);
+		public static class B extends MyState {
+			public B(MyState from) {
+				super(from);
 			}
 
 			@Override
-			protected List<State<Event>> defaultEntry() {
+			protected List<MyState> defaultEntry() {
 				return List.of(new B1(null));
 			}
-	
-			public static class B1 extends State<Event> {
-				public B1(State<Event> from) {
-					super(from, Event.class);
+
+			public static class B1 extends MyState {
+				public B1(MyState from) {
+					super(from);
 					TRANSITION(Event.advance, (e -> ENTER(new B2(this))));
 				}
 			}
 
-			public static class B2 extends State<Event> {
-				public B2(State<Event> from) {
-					super(from, Event.class);
+			public static class B2 extends MyState {
+				public B2(MyState from) {
+					super(from);
 					TRANSITION(Event.advance, (e -> EXIT()));
 				}
 			}
@@ -68,106 +66,117 @@ public class Active extends Superstate<Event> {
 		}
 	}
 
-	public static class Sub2 extends Superstate<Event> {
-		public Sub2(State<Event> from) {
-			super(from, Event.class);
+	public static class Sub2 extends MyState {
+		public Sub2(MyState from) {
+			super(from);
 		}
 
 		@Override
-		protected List<State<Event>> defaultEntry() {
+		protected List<MyState> defaultEntry() {
 			return List.of(new C(null));
 		}
 
-		public static class C extends State<Event> {
-			public C(State<Event> from) {
-				super(from, Event.class);
+		public static class C extends MyState {
+			public C(MyState from) {
+				super(from);
 				TRANSITION(Event.advance, (e -> ENTER(new D(this))));
 				TRANSITION(Event.toD, (e -> ENTER(new D(this))));
 			}
 		}
 
-		public static class D extends State<Event> {
-			public D(State<Event> from) {
-				super(from, Event.class);
+		public static class D extends MyState {
+			public D(MyState from) {
+				super(from);
 				TRANSITION(Event.advance, (e -> EXIT()));
 			}
 		}
 	}
 
-	public static class SubN extends Superstate<Event> {
-		public SubN(State<Event> from) {
-			super(from, Event.class);
+	public static class SubN extends MyState {
+		public SubN(MyState from) {
+			super(from);
 		}
 
 		@Override
 		protected void entryAction() {
-			((Active)parent).data.append("iS");
-		}
-		@Override
-		protected void exitAction() {
-			((Active)parent).data.append("oS");
-		}
-		@Override
-		protected void pauseAction() {
-			((Active)parent).data.append("pS");
-		}
-		@Override
-		protected void unpauseAction() {
-			((Active)parent).data.append("uS");
+			((Active) parent).data.append("iS");
 		}
 
 		@Override
-		protected List<State<Event>> defaultEntry() {
+		protected void exitAction() {
+			((Active) parent).data.append("oS");
+		}
+
+		@Override
+		protected void pauseAction() {
+			((Active) parent).data.append("pS");
+		}
+
+		@Override
+		protected void unpauseAction() {
+			((Active) parent).data.append("uS");
+		}
+
+		@Override
+		protected List<MyState> defaultEntry() {
 			return List.of(new E(null));
 		}
 
-		public static class E extends State<Event> {
-			public E(State<Event> from) {
-				super(from, Event.class);
+		public static class E extends MyState {
+			public E(MyState from) {
+				super(from);
 				TRANSITION(Event.advance, (e -> ENTER(new F(this))));
 				TRANSITION(Event.toF, (e -> ENTER(new F(this))));
 			}
+
 			@Override
 			protected void entryAction() {
-				((Active)(((SubN)parent).parent)).data.append("iE");
+				((Active) (((SubN) parent).parent)).data.append("iE");
 			}
+
 			@Override
 			protected void exitAction() {
-				((Active)(((SubN)parent).parent)).data.append("oE");
+				((Active) (((SubN) parent).parent)).data.append("oE");
 			}
+
 			@Override
 			protected void pauseAction() {
-				((Active)(((SubN)parent).parent)).data.append("pE");
+				((Active) (((SubN) parent).parent)).data.append("pE");
 			}
+
 			@Override
 			protected void unpauseAction() {
-				((Active)(((SubN)parent).parent)).data.append("uE");
+				((Active) (((SubN) parent).parent)).data.append("uE");
 			}
 		}
 
-		public static class F extends State<Event> {
-			public F(State<Event> from) {
-				super(from, Event.class);
+		public static class F extends MyState {
+			public F(MyState from) {
+				super(from);
 				TRANSITION(Event.endN, (e -> EXIT()));
 			}
+
 			@Override
 			protected void entryAction() {
-				((Active)(((SubN)parent).parent)).data.append("iF");
+				((Active) (((SubN) parent).parent)).data.append("iF");
 			}
+
 			@Override
 			protected void exitAction() {
-				((Active)(((SubN)parent).parent)).data.append("oF");
+				((Active) (((SubN) parent).parent)).data.append("oF");
 			}
+
 			@Override
 			protected void pauseAction() {
-				((Active)(((SubN)parent).parent)).data.append("pF");
+				((Active) (((SubN) parent).parent)).data.append("pF");
 			}
+
 			@Override
 			protected void unpauseAction() {
-				((Active)(((SubN)parent).parent)).data.append("uF");
+				((Active) (((SubN) parent).parent)).data.append("uF");
 			}
-	
-			}
+
+		}
 	}
 
 }

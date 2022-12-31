@@ -2,12 +2,9 @@ package fsm.examples.VL;
 
 import java.util.List;
 
-import fsm.base.State;
-import fsm.base.Superstate;
+public class Sub extends MyState {
 
-public class Sub extends Superstate<Event> {
-
-	public static class Normal extends State<Event> {
+	public static class Normal extends MyState {
 		@Override
 		public void entryAction() {
 			get(FSM.class, StringBuilder.class, "data").append("iN");
@@ -25,13 +22,13 @@ public class Sub extends Superstate<Event> {
 			get(FSM.class, StringBuilder.class, "data").append("uN");
 		}
 
-		public Normal(State<Event> from) {
-			super(from, Event.class);
+		public Normal(MyState from) {
+			super(from);
 			TRANSITION(Event.up, (payload -> ENTER(new High(this))));
 		}
 	}
 
-	public static class Low extends State<Event> {
+	public static class Low extends MyState {
 		@Override
 		public void entryAction() {
 			get(FSM.class, StringBuilder.class, "data").append("iL");
@@ -49,16 +46,16 @@ public class Sub extends Superstate<Event> {
 			get(FSM.class, StringBuilder.class, "data").append("uL");
 		}
 
-		public Low(State<Event> from) {
-			super(from, Event.class);
+		public Low(MyState from) {
+			super(from);
 			TRANSITION(Event.up, (payload -> ENTER(new High(this))));
 			TRANSITION(Event.clear, (payload -> ENTER(new Normal(this))));
 			TRANSITION(Event.exceed, (payload -> EXIT()));
-			TRANSITION(Event.last, (payload -> EXIT(new FSM.C(parent))));
+			TRANSITION(Event.last, (payload -> EXIT(new FSM.C((Sub)parent))));
 		}
 	}
 
-	public static class High extends State<Event> {
+	public static class High extends MyState {
 		@Override
 		public void entryAction() {
 			get(FSM.class, StringBuilder.class, "data").append("iH");
@@ -76,8 +73,8 @@ public class Sub extends Superstate<Event> {
 			get(FSM.class, StringBuilder.class, "data").append("uH");
 		}
 
-		public High(State<Event> from) {
-			super(from, Event.class);
+		public High(MyState from) {
+			super(from);
 			TRANSITION(Event.down, (payload -> ENTER(new Low(this))));
 			TRANSITION(Event.exceed, (payload -> EXIT()));
 		}
@@ -101,24 +98,24 @@ public class Sub extends Superstate<Event> {
 	}
 
 	@Override
-	public State<Event> defaultExit() {
+	public MyState defaultExit() {
 		return new FSM.D(this);
 	}
 
-	public Sub(State<Event> from, State<Event> entry) {
-		super(from, entry, Event.class);
+	public Sub(MyState from, MyState entry) {
+		super(from, entry);
 		TRANSITION(Event.reset, (payload -> ENTER(new Sub(this))));
 		TRANSITION(Event.error, (payload -> ENTER(new FSM.E(this))));
 	}
 
-	public Sub(State<Event> from) {
+	public Sub(MyState from) {
 		// this(from, new Normal(null));
-		super(from, Event.class);
+		super(from);
 		TRANSITION(Event.reset, (payload -> ENTER(new Sub(this))));
 		TRANSITION(Event.error, (payload -> ENTER(new FSM.E(this))));
 	}
 	@Override
-	protected List<State<Event>> defaultEntry() {
+	protected List<MyState> defaultEntry() {
 		return List.of(new Normal(null));
 	}
 
