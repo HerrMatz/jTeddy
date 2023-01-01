@@ -4,7 +4,7 @@ public class FSM extends MyState{
 
 	public FSM() {
 		super(null);
-		start(new Init(null));
+		start(new Init(null), new SimpleContextData());
 	}
 
 	public static class Init extends MyState {

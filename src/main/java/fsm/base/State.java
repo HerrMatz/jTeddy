@@ -123,6 +123,13 @@ public abstract class State<E extends Enum<E>, P, C> {
 	}
 
 	/**
+	 * @return The context data. Shared by all states in the state machine
+	 */
+	public C getContextData() {
+		return contextData;
+	}
+
+	/**
 	 * @return A list of all parallel substates
 	 */
 	public List<State<E, P, C>> getSubstates() {
@@ -145,7 +152,8 @@ public abstract class State<E extends Enum<E>, P, C> {
 	 * 
 	 * @param initState Initial state of the state machine
 	 */
-	protected void start(State<E, P, C> initState) {
+	protected void start(State<E, P, C> initState, C data) {
+		contextData = data;
 		copyRelevantDataTo(initState);
 		parallelSubstates.add(initState);
 		initState.parent = this;

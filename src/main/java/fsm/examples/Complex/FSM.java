@@ -4,13 +4,24 @@ public class FSM extends MyState {
 
 	public FSM() {
 		super(null);
-		start(new Init(null));
+		start(new Init(null), new SimpleContextData());
 	}
 
 	public static class Init extends MyState {
 		public Init(MyState from) {
 			super(from);
-			TRANSITION(Event.start, (e -> ENTER(new Active(this))));
+			TRANSITION(Event.start, (e -> {
+				contextData.i = e;
+				return ENTER(new Active(this));
+			}));
+		}
+		@Override
+		protected void entryAction() {
+			contextData.s.append("iI");
+		}
+		@Override
+		protected void exitAction() {
+			contextData.s.append("oI");
 		}
 	}
 

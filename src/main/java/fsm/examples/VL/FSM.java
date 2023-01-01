@@ -156,6 +156,6 @@ public class FSM extends MyState {
 		super(null);
 		// setPauseActionIsExitAction(true);
 		// setUnpauseActionIsEntryAction(true);
-		start(new A(null));
+		start(new A(null), new Object());
 	}
 }

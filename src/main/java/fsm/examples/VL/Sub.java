@@ -102,6 +102,7 @@ public class Sub extends MyState {
 		return new FSM.D(this);
 	}
 
+	// This constructor is only necessary if this state is entered explicitly at some point
 	public Sub(MyState from, MyState entry) {
 		super(from, entry);
 		TRANSITION(Event.reset, (payload -> ENTER(new Sub(this))));

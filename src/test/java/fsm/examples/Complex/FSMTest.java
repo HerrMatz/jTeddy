@@ -209,4 +209,14 @@ public class FSMTest {
 		assertEquals("iSiEiSiEoEiFpFpEpSpSuSuSuFuE", ((Active)fsm.getSubstate(0)).data.toString());
 	}
 
+	@Test
+	public void accessContextData() {
+		FSM fsm = new FSM();
+		assertEquals(0, fsm.getContextData().i);
+		assertEquals("iI", fsm.getContextData().s.toString());
+		fsm.handleEvent(new MyEvent(Event.start, 42));
+		assertEquals(42, fsm.getContextData().i);
+		assertEquals("iIoI", fsm.getContextData().s.toString());
+	}
+
 }
