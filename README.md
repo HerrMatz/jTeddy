@@ -26,6 +26,9 @@ jTeddy is a Java framework that allows for quick and concise implementation of h
 * Distinction between regular exit and explicit exit (pause):
   * Seperate exit action (for regular exit) and pause action (for explicit exit) methods can be defined
   * Useful if the superstate is not left on behalf of its substate(s) but from outside influences (e.g. an emergency stop which may not be wanted to trigger the substates' exit actions).
+  * Not defined in the UML standard
+* New substates of a given type can be added dynamically at runtime
+  * Not defined in the UML standard
 
 # Examples
 A simple state called Inactive that has four transitions:
@@ -59,3 +62,8 @@ where Event is an enumeration that defines all the events you want to send, Inte
 ---
 
 For more and more comprehensive examples see [here](src/main/java/fsm/examples). The respective *_HowTo.svg files depict the necessary method calls for changing states.
+
+---
+
+Questions, bugs, rebuke, improvement ideas? Feel free to contact me on [LinkedIn](https://www.linkedin.com/in/matz-heitm%C3%BCller-161a84205/) :)
+
