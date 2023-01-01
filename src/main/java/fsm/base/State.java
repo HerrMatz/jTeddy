@@ -239,6 +239,17 @@ public abstract class State<E extends Enum<E>, P, C> {
 	 * @return EventConsumption.fullyUsed for ease of use in lambdas
 	 */
 	protected EventConsumption EXIT() {
+		// terminate state machine
+		if(parent == null) {
+			runExitActionRecurse();
+			for(int i = 0; i < parallelSubstates.size(); i++) {
+				parallelSubstates.set(i, null);
+			}
+			for(int i = 0; i < pausedSubstates.size(); i++) {
+				pausedSubstates.set(i, null);
+			}
+			return EventConsumption.fullyUsed;
+		}
 		var exitTo = parent.defaultExit();
 		// parent has no default exit because it is running in parallel
 		if (exitTo == null) {

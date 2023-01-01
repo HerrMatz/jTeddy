@@ -219,4 +219,16 @@ public class FSMTest {
 		assertEquals("iIoI", fsm.getContextData().s.toString());
 	}
 
+	@Test
+	public void fsmTermination() {
+		FSM fsm = new FSM();
+		fsm.handleEvent(new MyEvent(Event.start, 0));
+		fsm.handleEvent(new MyEvent(Event.exit, 0));
+		fsm.handleEvent(new MyEvent(Event.exit, 0));
+		assertEquals(0, fsm.getSubstates().size());
+		fsm.handleEvent(Event.start);	// no exception thrown
+		fsm.handleEvent(new MyEvent(Event.start, 0));	// no exception thrown
+		assertEquals(0, fsm.getSubstates().size());
+	}
+
 }

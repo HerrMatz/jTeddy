@@ -31,6 +31,7 @@ public class FSM extends MyState {
 			TRANSITION(Event.start, (e -> ENTER(new Active(this))));
 			TRANSITION(Event.deep, (e -> ENTER_DEEP(new Active(this))));
 			TRANSITION(Event.shallow, (e -> ENTER_SHALLOW(new Active(this))));
+			TRANSITION(Event.exit, (e -> EXIT()));
 		}
 	}
 	
