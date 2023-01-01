@@ -102,17 +102,12 @@ public class Sub extends MyState {
 		return new FSM.D(this);
 	}
 
-	// This constructor is only necessary if this state is entered explicitly at some point
-	public Sub(MyState from, MyState entry) {
-		super(from, entry);
+	public Sub(MyState from) {
+		super(from);
 		TRANSITION(Event.reset, (payload -> ENTER(new Sub(this))));
 		TRANSITION(Event.error, (payload -> ENTER(new FSM.E(this))));
 		TRANSITION(Event.tick, (payload -> ENTER_DEEP(new Sub(this))));
 		TRANSITION(Event.shallow, (payload -> ENTER_SHALLOW(new Sub(this))));
-	}
-
-	public Sub(MyState from) {
-		this(from, null);
 	}
 	@Override
 	protected List<MyState> defaultEntry() {

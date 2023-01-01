@@ -27,42 +27,12 @@ public abstract class State<E extends Enum<E>, P, C> {
 												// otherwise unpause action
 
 	/**
-	 * For use in user defined base state. Used for entry of a regular state or
-	 * default entry of a superstate.
-	 * 
-	 * @param from       Original state that this new state replaces. If null, the
-	 *                   old state will remain intact.
-	 * @param eventClass Class of the event type this state handles
-	 */
-	protected State(State<E, P, C> from, Class<E> eventClass) {
-		// this(from, eventClass, true);
-		this(from, null, eventClass);
-	}
-
-	/**
-	 * For use in user defined base state. Used for explicit entry of a superstate
-	 * 
-	 * @param from       Original state that this new state replaces. If null, the
-	 *                   old state will remain intact.
-	 * @param sub        Explicit entry state to enter
-	 * @param eventClass Class of the event type this state handles
-	 */
-	protected State(State<E, P, C> from, State<E, P, C> sub, Class<E> eventClass) {
-		this(from, eventClass, sub == null);
-		if(sub != null) {
-			enterSubstates(List.of(sub));
-		}
-	}
-
-	/**
-	 * Used for entry of a regular state or default entry of a superstate
-	 * 
 	 * @param from             Original state that this new state replaces. If null,
 	 *                         the old state will remain intact.
 	 * @param eventClass       Class of the event type this state handles
 	 * @param makeDefaultEntry
 	 */
-	private State(State<E, P, C> other, Class<E> eventType, boolean makeDefaultEntry) {
+	protected State(State<E, P, C> other, Class<E> eventClass) {
 		// copy relevant data from state
 		if (other != null) {
 			parent = other.parent;
@@ -77,19 +47,16 @@ public abstract class State<E extends Enum<E>, P, C> {
 			parent = null;
 			parallelSubstates = new ArrayList<>();
 			pausedSubstates = new ArrayList<>();
-			events = EnumSet.allOf(eventType);
+			events = EnumSet.allOf(eventClass);
 			transitions = new HashMap<>();
+			pauseActionIsExitAction = true;
+			unpauseActionIsEntryAction = true;
 		}
 		isPaused = false;
 
 		// initialise transitions, will be filled by actual state constructor
 		for (E event : events)
 			transitions.put(event, (payload -> EventConsumption.unused));
-
-		// only for relevant for superstates: attatch default entry state(s)
-		if (makeDefaultEntry) {
-			enterSubstates(defaultEntry());
-		}
 	}
 
 	/**
@@ -180,8 +147,27 @@ public abstract class State<E extends Enum<E>, P, C> {
 	 */
 	protected EventConsumption ENTER(State<E, P, C> newState) {
 		copyRelevantDataTo(newState);
+		newState.makeDefaultEntry();
 		if (parent != null) {
 			parentSwitchSubstate(this, newState, isSuperstate());
+		}
+		return EventConsumption.fullyUsed;
+	}
+
+	/**
+	 * For explicit entry of a superstate
+	 * @param superState Superstate to enter
+	 * @param explicitEntryState Explicit substate of superState to enter
+	 * @return EventConsumption.fullyUsed for ease of use in lambdas
+	 */
+	protected EventConsumption ENTER_EXPLICIT(State<E, P, C> superState, State<E, P, C> explicitEntryState) {
+		copyRelevantDataTo(superState);
+		copyRelevantDataTo(explicitEntryState);
+		explicitEntryState.parent = superState;
+		explicitEntryState.makeDefaultEntry();
+		superState.parallelSubstates.add(explicitEntryState);
+		if (parent != null) {
+			parentSwitchSubstate(this, superState, isSuperstate());
 		}
 		return EventConsumption.fullyUsed;
 	}
@@ -368,20 +354,6 @@ public abstract class State<E extends Enum<E>, P, C> {
 	}
 
 	/**
-	 * Appends parallelSubs to this states active substates. Does not run entry
-	 * Action
-	 * 
-	 * @param parallelSubs parallel substates to add to this state
-	 */
-	private void enterSubstates(List<? extends State<E, P, C>> parallelSubs) {
-		for (State<E, P, C> sub : parallelSubs) {
-			copyRelevantDataTo(sub);
-			parallelSubstates.add(sub);
-			sub.parent = this;
-		}
-	}
-
-	/**
 	 * @return true if this is a superstate, otherwise false. A state is a
 	 *         superstate if it has one or more default entry states
 	 */
@@ -390,10 +362,7 @@ public abstract class State<E extends Enum<E>, P, C> {
 	}
 
 	/**
-	 * Recursive helper function for handleEvent to prevent redundant verification
-	 * 
-	 * @param event
-	 * @return
+	 * @see #handleEvent(Event)
 	 */
 	private EventConsumption _handleEvent(BaseEvent<E, P> event) {
 		EventConsumption ret = EventConsumption.unused;
@@ -429,14 +398,31 @@ public abstract class State<E extends Enum<E>, P, C> {
 		}
 	}
 
+	/**
+	 * @see #APPEND(State)
+	 */
 	private EventConsumption APPEND(List<? extends State<E, P, C>> appendStates) {
 		parallelSubstates.addAll(appendStates);
 		for (var substate : appendStates) {
 			substate.parent = this;
 			copyRelevantDataTo(substate);
+			substate.makeDefaultEntry();
 			substate.runEntryActionRecurse();
 		}
 		return EventConsumption.fullyUsed;
+	}
+
+	/**
+	 * Enters this state default entry state(s) recursively.
+	 * Does not call entry actions.
+	 */
+	private void makeDefaultEntry() {
+		for (State<E, P, C> sub : defaultEntry()) {
+			copyRelevantDataTo(sub);
+			parallelSubstates.add(sub);
+			sub.parent = this;
+			sub.makeDefaultEntry();
+		}
 	}
 
 	/**
@@ -460,6 +446,9 @@ public abstract class State<E extends Enum<E>, P, C> {
 			}
 			unpause();
 			unpauseSubstates();
+			if(shallow) {
+				parallelSubstates.forEach(s -> s.makeDefaultEntry());
+			}
 			return EventConsumption.fullyUsed;
 		}
 		// Check if there is a history present for the requested state
@@ -496,6 +485,9 @@ public abstract class State<E extends Enum<E>, P, C> {
 		return EventConsumption.fullyUsed;
 	}
 
+	/**
+	 * @see #EXIT(State)
+	 */
 	private EventConsumption EXIT(State<E, P, C> explicitExitState, boolean execExitAction) {
 		copyRelevantDataTo(explicitExitState);
 		parent.parentSwitchSubstate(parent, explicitExitState, !execExitAction);

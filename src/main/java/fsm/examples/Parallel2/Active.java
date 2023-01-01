@@ -10,6 +10,8 @@ public class Active extends MyState {
 		super(from);
 		TRANSITION(Event.exit, (e -> ENTER(new FSM.Inactive(this))));
 		TRANSITION(Event.inner, (e -> APPEND(new SubN(null))));
+		TRANSITION(Event.shallow, (e -> ENTER_SHALLOW(new Active(this))));
+		TRANSITION(Event.deep, (e -> ENTER_DEEP(new Active(this))));
 	}
 
 	@Override

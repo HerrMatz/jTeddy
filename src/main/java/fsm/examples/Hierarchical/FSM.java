@@ -51,7 +51,7 @@ public class FSM extends MyState {
 
 		public B(MyState from) {
 			super(from);
-			TRANSITION(Event.up, (payload -> ENTER(new Sub(this, new Sub.High(null)))));
+			TRANSITION(Event.up, (payload -> ENTER_EXPLICIT(new Sub(this), new Sub.High(null))));
 		}
 	}
 
@@ -154,8 +154,8 @@ public class FSM extends MyState {
 
 	public FSM() {
 		super(null);
-		// setPauseActionIsExitAction(true);
-		// setUnpauseActionIsEntryAction(true);
+		setPauseActionIsExitAction(false);
+		setUnpauseActionIsEntryAction(false);
 		start(new A(null), new Object());
 	}
 }

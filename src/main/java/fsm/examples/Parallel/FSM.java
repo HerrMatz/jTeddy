@@ -4,6 +4,8 @@ public class FSM extends MyState {
 
 	public FSM() {
 		super(null);
+		setPauseActionIsExitAction(false);
+		setUnpauseActionIsEntryAction(false);
 		start(new Init(null), new SimpleContextData());
 	}
 
