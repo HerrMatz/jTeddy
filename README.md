@@ -58,4 +58,4 @@ where Event is an enumeration that defines all the events you want to send, Inte
 
 ---
 
-For more and more comprehensive examples see [here](src/main/java/fsm/examples).
+For more and more comprehensive examples see [here](src/main/java/fsm/examples). The respective *_HowTo.svg files depict the necessary method calls for changing states.
