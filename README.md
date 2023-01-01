@@ -31,7 +31,7 @@ jTeddy is a Java framework that allows for quick and concise implementation of h
   * Not defined in the UML standard
 
 # Examples
-A simple state called Inactive that has four transitions:
+A simple state called Inactive that has four simple transitions:
 
 	public static class Inactive extends MyState {
 		public Inactive(MyState from) {
@@ -45,15 +45,59 @@ A simple state called Inactive that has four transitions:
 
 ---
 
+A simple state with a more complex transition that makes use of transition parameters:
+
+	public static class Init extends MyState {
+		public Init(MyState from) {
+			super(from);
+			TRANSITION(Event.start, (e -> {
+				contextData.i = e;
+				return ENTER(new Active(this));
+			}));
+		}
+		@Override
+		protected void entryAction() {
+			contextData.s.append("iI");
+		}
+		@Override
+		protected void exitAction() {
+			contextData.s.append("oI");
+		}
+	}
+
+Note that the `entryAction()` and `exitAction()` are called automatically during a state change. Both methods as well as the transition access the `contextData` which is shared by all states of a state machine object.
+
+---
+
+States may contain their own fields that can be accessed by themself and their immediate substates by cast. By use of the `get()` method, even indirect substates (such as subsubstates) may access another states data. This is hacky, not recommended and indicates a bad state machine design.
+
+	public class Active extends MyState {
+
+	public StringBuilder data = new StringBuilder();
+
+		public static class SubN extends MyState {
+			public SubN(MyState from) {
+				super(from);
+			}
+
+			@Override
+			protected void entryAction() {
+				((Active)parent).data.append("iS");
+			}
+			@Override
+			protected void exitAction() {
+				((Active)parent).data.append("oS");
+			}
+		}
+	}
+
+---
+
 To declare the input alphabet, the transition payload type as well as the type of the shared context data, you need to override the base state class with a base class of your own:
 
 	public abstract class MyState extends State<Event, Integer, SimpleContextData> {
 		public MyState(MyState other) {
 			super(other, Event.class);
-		}
-		// for explicit entries
-		public MyState(MyState from, MyState entry) {
-			super(from, entry, Event.class);
 		}
 	}
 
