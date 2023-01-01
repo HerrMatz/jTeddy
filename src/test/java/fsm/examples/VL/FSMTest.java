@@ -277,7 +277,22 @@ public class FSMTest {
 		fsm.handleEvent(Event.start);
 		fsm.handleEvent(Event.up);
 		assertThat(fsm.getSubstate(0), instanceOf(Sub.class));
-		assertThat(fsm.getSubstate(0).getSubstate(0), instanceOf(Sub.High.class));		fsm.handleEvent(Event.tick);
+		assertThat(fsm.getSubstate(0).getSubstate(0), instanceOf(Sub.High.class));
+		fsm.handleEvent(Event.tick);
+		assertThat(fsm.getSubstate(0), instanceOf(Sub.class));
+		assertThat(fsm.getSubstate(0).getSubstate(0), instanceOf(Sub.High.class));
+		assertEquals(1, fsm.getSubstates().size());
+		assertEquals(1, fsm.getSubstate(0).getSubstates().size());
+	}
+	
+	@Test
+	public void goToOwnShallowHistory() {
+		FSM fsm = new FSM();
+		fsm.handleEvent(Event.start);
+		fsm.handleEvent(Event.up);
+		assertThat(fsm.getSubstate(0), instanceOf(Sub.class));
+		assertThat(fsm.getSubstate(0).getSubstate(0), instanceOf(Sub.High.class));
+		fsm.handleEvent(Event.shallow);
 		assertThat(fsm.getSubstate(0), instanceOf(Sub.class));
 		assertThat(fsm.getSubstate(0).getSubstate(0), instanceOf(Sub.High.class));
 		assertEquals(1, fsm.getSubstates().size());

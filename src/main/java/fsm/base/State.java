@@ -429,11 +429,22 @@ public abstract class State<E extends Enum<E>, P, C> {
 	 * @return EventConsumption.fullyUsed for ease of use in lambdas
 	 */
 	private EventConsumption enterHistory(State<E, P, C> stateWithHistory, boolean shallow) {
-		copyRelevantDataTo(stateWithHistory);
 		pauseSubstates();
 		State<E, P, C> historyState = null;
+		// superstate may enter its own history node
+		if(getClass().equals(stateWithHistory.getClass())) {
+			pause();
+			if(shallow) {
+				for (var substate : pausedSubstates) {
+					substate.pausedSubstates = new ArrayList<>();
+				}
+			}
+			unpause();
+			unpauseSubstates();
+			return EventConsumption.fullyUsed;
+		}
 		// Check if there is a history present for the requested state
-		if (parent != null) {
+		else if (parent != null) {
 			for (var substate : parent.pausedSubstates) {
 				if (stateWithHistory.getClass().equals(substate.getClass())) {
 					historyState = substate;
